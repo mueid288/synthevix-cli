@@ -148,9 +148,67 @@ def alias_add(
 
 @alias_app.command("list")
 def alias_list():
-    """List all custom aliases."""
+    """List and manage all custom aliases."""
+    import os
+    import questionary
+    import sys
+    
     aliases = models.list_aliases()
-    print_aliases_table(aliases, console, _theme_color())
+    if not aliases:
+        console.print("[dim]No aliases yet. Use `synthevix forge alias add`.[/dim]")
+        return
+        
+    color = _theme_color()
+    
+    # Render table visually first so they can see existing logic
+    print_aliases_table(aliases, console, color)
+    console.print()
+
+    choices = [questionary.Choice(title=a["alias"], value=a) for a in aliases]
+    choices.append(questionary.Choice(title="←  Back", value=None))
+
+    from synthevix.menu import _q_style
+    
+    selected = questionary.select(
+        "Manage an alias:",
+        choices=choices,
+        style=_q_style(color),
+        use_arrow_keys=True
+    ).ask()
+
+    if not selected:
+        return
+
+    action = questionary.select(
+        f"Selected [ {selected['alias']} ]:",
+        choices=[
+            questionary.Choice("🚀 Execute", "exec"),
+            questionary.Choice("✏️  Edit", "edit"),
+            questionary.Choice("❌ Delete", "del"),
+            questionary.Choice("←  Cancel", None)
+        ],
+        style=_q_style(color)
+    ).ask()
+
+    if action == "exec":
+        console.print(f"  [dim]⚡ Executing: {selected['command']}[/dim]")
+        sys.exit(os.system(selected['command']) >> 8)
+    elif action == "edit":
+        new_name = questionary.text("Alias trigger:", default=selected["alias"], style=_q_style(color)).ask()
+        if not new_name or not new_name.strip(): return
+        new_cmd = questionary.text("Command to execute:", default=selected["command"], style=_q_style(color)).ask()
+        if not new_cmd or not new_cmd.strip(): return
+        new_desc = questionary.text("Description (optional):", default=selected.get("description", ""), style=_q_style(color)).ask()
+        
+        # Remove old if name changed
+        if new_name.strip() != selected["alias"]:
+            models.delete_alias(selected["alias"])
+            
+        models.add_alias(new_name.strip(), new_cmd.strip(), new_desc.strip() if new_desc else "")
+        console.print(f"\n  [dim]✓ Alias updated.[/dim]")
+    elif action == "del":
+        models.delete_alias(selected["alias"])
+        console.print(f"\n  [dim]✓ Alias '{selected['alias']}' deleted.[/dim]")
 
 
 @alias_app.command("remove")

@@ -185,3 +185,39 @@ def cmd_import(
     shutil.copy2(src, dest)
     color = get_theme_data(load_config().theme.active)["primary"]
     console.print(f"  [bold {color}]✓[/bold {color}]  Data restored from {src}")
+
+
+def main():
+    """Custom entry point to intercept custom aliases before Typer runs."""
+    import sys
+    import os
+    
+    if len(sys.argv) > 1:
+        # Check if the first argument is a custom alias
+        potential_alias = sys.argv[1]
+        
+        # Don't intercept known top-level commands or flags
+        if not potential_alias.startswith("-") and potential_alias not in ["brain", "quest", "cosmos", "forge", "config", "stats", "dashboard", "tui", "import"]:
+            # Need DB init for models
+            init_db()
+            from synthevix.forge.models import list_aliases
+            
+            try:
+                aliases = list_aliases()
+                for a in aliases:
+                    if a["alias"] == potential_alias:
+                        # Reconstruct the command string, appending any extra arguments the user passed
+                        extra_args = " ".join(sys.argv[2:])
+                        full_cmd = f"{a['command']} {extra_args}".strip()
+                        
+                        cfg = load_config()
+                        color = get_theme_data(cfg.theme.active)["primary"]
+                        console.print(f"  [dim]⚡ Executing alias: {full_cmd}[/dim]")
+                        
+                        # Execute the raw command in the shell
+                        sys.exit(os.system(full_cmd) >> 8)
+            except Exception:
+                pass  # If DB fails or table doesn't exist, just fall through to Typer
+                
+    # Run the main Typer app
+    app()

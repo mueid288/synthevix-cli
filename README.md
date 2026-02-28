@@ -153,6 +153,9 @@ synthevix forge init --template fastapi
 
 # Check your progress
 synthevix quest stats
+
+# Execute a custom alias directly (e.g., 'gp' -> 'git push')
+synthevix gp
 ```
 
 ---
@@ -175,6 +178,16 @@ Running `synthevix` with no subcommand displays the full launch screen:
   │  💜  Today's Mood: 😄 Great         │
   │  💻  Coding Streak: 9 days          │
   └─────────────────────────────────────┘
+
+? What do you want to do?
+  ── Quick Actions ─────────────────────────────────────
+   🖥  Launch TUI Dashboard
+   📊  Full stats overview
+  ── Brain ─────────────────────────────────────────────
+   📝  Add note
+   📓  Add journal entry
+   ...
+
 ```
 
 **Components:**
@@ -352,6 +365,7 @@ Forge is your personal dev toolkit. Scaffold projects from templates, manage reu
 | `forge streak` | View your coding streak (git-based) | `synthevix forge streak` |
 | `forge git <action>` | Automated git workflows | `synthevix forge git quicksave` |
 | `forge alias` | Manage custom command aliases | `synthevix forge alias add gs "git status"` |
+| `synthevix <alias>` | Execute an alias directly | `synthevix gp` |
 | `forge stats` | Dev stats: commits, lines, etc. | `synthevix forge stats --last 7d` |
 
 #### Built-in Project Templates
@@ -567,7 +581,9 @@ synthevix config edit               # Open config in $EDITOR
 synthevix config reset              # Reset config to defaults
 
 # ── Global ───────────────────────────────────────────────────────────────
+synthevix                           # Launch screen (banner + stats)
 synthevix stats                     # Full overview dashboard
+synthevix <alias>                   # Execute custom alias directly
 synthevix backup                    # Manual backup
 synthevix import <file>             # Import data archive
 synthevix export                    # Export all data

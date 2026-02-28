@@ -78,6 +78,7 @@ MODULES = [
         ("↩   Git undo last",        ["forge", "git", "undo"]),
         ("📋  Git today's log",      ["forge", "git", "today"]),
         ("🧹  Git cleanup",          ["forge", "git", "cleanup"]),
+        ("➕  Add new alias",        ["forge", "alias", "add"]),
         ("🔤  Manage aliases",       ["forge", "alias", "list"]),
     ]),
     ("⚙   Config  — themes & settings", [
@@ -136,6 +137,14 @@ def _prompt_extra(cli_args: List[str], style: Style) -> List[str]:
     if last == "search":
         val = questionary.text("Search query:", style=style).ask()
         return [val.strip()] if val and val.strip() else []
+
+    if "alias" in cli_args and "add" in cli_args:
+        al_name = questionary.text("Alias trigger (e.g., 'gp'):", style=style).ask()
+        if not al_name or not al_name.strip(): return []
+        al_cmd = questionary.text("Command to execute (e.g., 'git push'):", style=style).ask()
+        if not al_cmd or not al_cmd.strip(): return []
+        al_desc = questionary.text("Description (optional):", style=style).ask()
+        return [al_name.strip(), al_cmd.strip()] + (["--desc", al_desc.strip()] if al_desc and al_desc.strip() else [])
 
     if last == "set":
         val = questionary.select(

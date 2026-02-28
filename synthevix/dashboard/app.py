@@ -92,11 +92,27 @@ class SynthevixDashboard(App):
         # Suspend Textual so the normal Rich pager can take over the terminal
         with self.suspend():
             try:
+                import os
+                os.system('clear')
                 cmd_view(message.entry_id)
+
+                print()
+                choice = input("  [e] ✏️  Edit  |  [d] 🗑  Delete  |  [Enter] ↩  Back\n  > ").strip().lower()
+
+                if choice == "e":
+                    from synthevix.brain.commands import cmd_edit
+                    cmd_edit(message.entry_id)
+                elif choice == "d":
+                    confirm = input("  Are you sure you want to delete this entry? [y/N] > ").strip().lower()
+                    if confirm == "y":
+                        from synthevix.brain.models import delete_entry
+                        delete_entry(message.entry_id)
+                        print("  ✓ Entry deleted.")
             except Exception as e:
                 print(f"Error viewing entry: {e}")
                 
-        # When suspend finishes, focus the brain widget again
+        # When suspend finishes, refresh the brain list and focus it
+        self.query_one(BrainWidget).update_brain()
         self.query_one(BrainWidget).focus()
 
     def action_log_mood(self) -> None:

@@ -106,6 +106,13 @@ def _prompt_extra(cli_args: List[str], style: Style) -> List[str]:
     """Prompt for arguments that specific commands require."""
     last = cli_args[-1] if cli_args else ""
 
+    # brain add — prompt for title
+    if "brain" in cli_args and "add" in cli_args:
+        title = questionary.text("Entry title (optional):", style=style).ask()
+        if title and title.strip():
+            return ["--title", title.strip()]
+        return []
+
     # quest add — needs title + difficulty
     if "quest" in cli_args and "add" in cli_args:
         title = questionary.text("Quest title:", style=style).ask()
@@ -148,7 +155,16 @@ def _prompt_extra(cli_args: List[str], style: Style) -> List[str]:
 
     if last == "init":
         val = questionary.text("Project name:", style=style).ask()
-        return [val.strip()] if val and val.strip() else []
+        if not val or not val.strip():
+            return []
+            
+        template = questionary.select(
+            "Choose template:",
+            choices=["python-basic", "fastapi", "react-ts", "cli-tool"],
+            style=style,
+        ).ask()
+        
+        return [val.strip(), "--template", template] if template else [val.strip()]
 
     return []
 
@@ -226,7 +242,10 @@ def run_menu(console: Console, initial_hex_color: str, username: str = "Commande
             console.print()
             _invoke(cli_args)
             console.print()
-            _after_action(console, style, module_name="")
+            post = _after_action(console, style, module_name="")
+            if post == "exit":
+                console.print(f"\n  [dim]See you later, {username}. ✨[/dim]\n")
+                break
             continue
 
         # ── Module sub-menu ────────────────────────────

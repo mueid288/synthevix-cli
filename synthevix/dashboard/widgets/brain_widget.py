@@ -22,7 +22,7 @@ class BrainWidget(DataTable):
 
     def on_mount(self) -> None:
         self.cursor_type = "row"
-        self.add_columns("ID", "Type", "Title")
+        self.add_columns("ID", "Type", "Title", "Tags")
         self.update_brain()
         self.set_interval(20.0, self.update_brain)
 
@@ -54,6 +54,7 @@ class BrainWidget(DataTable):
             "bookmark": "blue",
         }
 
+        import json
         for e in entries:
             t_style = type_colors.get(e["type"], "white")
             title = e["title"] or "Untitled"
@@ -61,9 +62,20 @@ class BrainWidget(DataTable):
             if len(title) > 30:
                 title = title[:27] + "..."
 
+            try:
+                tags = json.loads(e.get("tags", "[]"))
+            except Exception:
+                tags = []
+                
+            tags_text = Text()
+            for t in tags:
+                tags_text.append(f" {t} ", style=f"black on {primary}")
+                tags_text.append(" ")
+
             self._entry_ids.append(e["id"])
             self.add_row(
                 Text(str(e["id"]), style="dim"),
                 Text(e["type"][:4].upper(), style=t_style),
                 Text(title, style=f"bold {primary}"),
+                tags_text
             )

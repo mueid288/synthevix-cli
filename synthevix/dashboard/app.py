@@ -73,16 +73,32 @@ class SynthevixDashboard(App):
 
     @on(QuestWidget.QuestSelected)
     def handle_quest_selected(self, message: QuestWidget.QuestSelected) -> None:
-        """Handle when a user clicks a quest to complete it."""
-        from synthevix.quest.models import complete_quest
-        try:
-            earned_xp = complete_quest(message.quest_id)
-            self.notify(f"Quest Complete! +{earned_xp} XP", title="Victory", timeout=3)
-            # Instantly refresh the profile (XP bar) and quest list
-            self.query_one(ProfileWidget).update_profile()
-            self.query_one(QuestWidget).update_quests()
-        except Exception as e:
-            self.notify(str(e), title="Error", severity="error")
+        """Handle when a user clicks a quest to prompt for action."""
+        from synthevix.dashboard.modals import QuestActionModal
+        
+        def check_modal_result(action: str | None) -> None:
+            if not action:
+                return
+            
+            from synthevix.quest import models
+            try:
+                if action == "complete":
+                    earned_xp = models.complete_quest(message.quest_id)
+                    self.notify(f"Quest Complete! +{earned_xp} XP", title="Victory", timeout=3)
+                elif action == "fail":
+                    models.fail_quest(message.quest_id)
+                    self.notify(f"Quest Failed. XP deducted.", title="Defeat", severity="warning", timeout=3)
+                elif action == "delete":
+                    models.delete_quest(message.quest_id)
+                    self.notify(f"Quest Deleted.", title="Removed", timeout=3)
+
+                # Instantly refresh the profile (XP bar) and quest list
+                self.query_one(ProfileWidget).update_profile()
+                self.query_one(QuestWidget).update_quests()
+            except Exception as e:
+                self.notify(str(e), title="Error", severity="error")
+
+        self.push_screen(QuestActionModal(message.quest_title), check_modal_result)
 
     @on(BrainWidget.BrainEntrySelected)
     def handle_brain_selected(self, message: BrainWidget.BrainEntrySelected) -> None:
@@ -114,6 +130,19 @@ class SynthevixDashboard(App):
         # When suspend finishes, refresh the brain list and focus it
         self.query_one(BrainWidget).update_brain()
         self.query_one(BrainWidget).focus()
+
+    @on(ForgeWidget.AliasSelected)
+    def handle_alias_selected(self, message: ForgeWidget.AliasSelected) -> None:
+        """Execute the chosen alias from the dashboard."""
+        with self.suspend():
+            import os
+            print()
+            print(f"  ⚡ Executing: {message.command}\n")
+            os.system(message.command)
+            print()
+            input("  [Enter] ↩  Back to Dashboard\n  > ")
+            
+        self.notify(f"Executed alias '{message.alias}'", title="Forge")
 
     def action_log_mood(self) -> None:
         """Drop out of the TUI momentarily to log a new mood."""

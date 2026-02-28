@@ -12,33 +12,34 @@ class QuestWidget(DataTable):
 
     class QuestSelected(Message):
         """Emitted when a quest row is clicked or Enter is pressed."""
-        def __init__(self, quest_id: int) -> None:
+        def __init__(self, quest_id: int, quest_title: str) -> None:
             self.quest_id = quest_id
+            self.quest_title = quest_title
             super().__init__()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._quest_ids: list[int] = []
+        self._quests: list[dict] = []
 
     def on_mount(self) -> None:
         self.cursor_type = "row"
-        self.add_columns("ID", "Diff", "Quest")
+        self.add_columns("ID", "Diff", "Quest", "Due")
         self.update_quests()
         self.set_interval(15.0, self.update_quests)
 
     def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
-        """When a row is selected (via Enter/Click), use cursor_row index to find the quest ID."""
+        """When a row is selected (via Enter/Click), use cursor_row index to find the quest."""
         idx = event.cursor_row
-        if idx < 0 or idx >= len(self._quest_ids):
+        if idx < 0 or idx >= len(self._quests):
             return
 
-        quest_id = self._quest_ids[idx]
-        self.post_message(self.QuestSelected(quest_id))
+        q = self._quests[idx]
+        self.post_message(self.QuestSelected(q["id"], q["title"]))
 
     def update_quests(self) -> None:
         """Fetch active quests and populate the data table."""
         self.clear()
-        self._quest_ids.clear()
+        self._quests.clear()
 
         try:
             quests = list_quests(status="active", limit=50)
@@ -56,11 +57,30 @@ class QuestWidget(DataTable):
             "legendary": "bold bright_magenta",
         }
 
+        import datetime
+        from synthevix.core.utils import format_relative
+        
         for q in quests:
             diff_style = diff_colors.get(q["difficulty"], "white")
-            self._quest_ids.append(q["id"])
+            self._quests.append(q)
+            
+            due_str = "[dim]—[/dim]"
+            if q.get("due_date"):
+                try:
+                    due_date = datetime.datetime.strptime(q["due_date"].split()[0], "%Y-%m-%d").date()
+                    rel_due = format_relative(q["due_date"])
+                    if due_date < datetime.date.today():
+                        due_str = f"[bold red]{rel_due}[/bold red]"
+                    elif due_date == datetime.date.today():
+                        due_str = f"[bold yellow]Today[/bold yellow]"
+                    else:
+                        due_str = f"[dim]{rel_due}[/dim]"
+                except Exception:
+                    due_str = f"[dim]{q['due_date']}[/dim]"
+
             self.add_row(
                 Text(str(q["id"]), style="dim"),
                 Text(q["difficulty"][:3].upper(), style=diff_style),
                 Text(q["title"], style=f"bold {primary}"),
+                Text.from_markup(due_str),
             )

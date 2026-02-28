@@ -47,6 +47,7 @@ def print_quests_table(quests: List[dict], console: Console, theme_color: str) -
     table.add_column("Difficulty", width=12)
     table.add_column("XP", width=6, justify="right")
     table.add_column("Created", width=12)
+    table.add_column("Due", width=12)
 
     for q in quests:
         status = q.get("status", "active")
@@ -56,6 +57,21 @@ def print_quests_table(quests: List[dict], console: Console, theme_color: str) -
         diff_label = f"[{diff_color}]{diff}[/{diff_color}]"
         xp = str(q.get("xp_earned", 0)) if q.get("xp_earned") else "—"
 
+        import datetime
+        due_str = "[dim]—[/dim]"
+        if q.get("due_date"):
+            try:
+                due_date = datetime.datetime.strptime(q["due_date"].split()[0], "%Y-%m-%d").date()
+                rel_due = format_relative(q["due_date"])
+                if due_date < datetime.date.today():
+                    due_str = f"[bold red]{rel_due}[/bold red]"
+                elif due_date == datetime.date.today():
+                    due_str = f"[bold yellow]Today[/bold yellow]"
+                else:
+                    due_str = f"[dim]{rel_due}[/dim]"
+            except Exception:
+                due_str = f"[dim]{q['due_date']}[/dim]"
+
         table.add_row(
             str(q["id"]),
             icon,
@@ -63,6 +79,7 @@ def print_quests_table(quests: List[dict], console: Console, theme_color: str) -
             diff_label,
             xp,
             format_relative(q.get("created_at")),
+            due_str,
         )
 
     console.print(table)

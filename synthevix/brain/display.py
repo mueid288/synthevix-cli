@@ -51,7 +51,8 @@ def print_entries_table(entries: List[dict], console: Console, theme_color: str)
         label = f"[{color}]{icon} {t}[/{color}]"
 
         preview = e.get("title") or truncate_text(e.get("content", ""), 40)
-        tags_str = ", ".join(parse_tags(e.get("tags", "[]"))) or "[dim]—[/dim]"
+        tags_list = parse_tags(e.get("tags", "[]"))
+        tags_str = " ".join(f"[black on {theme_color}] {t} [/]" for t in tags_list) if tags_list else "[dim]—[/dim]"
         date_str = format_relative(e.get("created_at"))
 
         table.add_row(str(e["id"]), label, truncate_text(preview, 44), tags_str, date_str)

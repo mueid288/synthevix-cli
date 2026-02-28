@@ -1,0 +1,52 @@
+/* synthevix/dashboard/styles.tcss */
+
+Screen {
+    background: $panel;
+}
+
+#main-grid {
+    layout: grid;
+    grid-size: 3 3;
+    grid-columns: 1fr 1fr 1fr;
+    grid-rows: 1fr 1fr 1fr;
+    margin: 1 2;
+    grid-gutter: 1 2;
+}
+
+BaseWidget {
+    border: round $primary;
+    background: $panel;
+    padding: 1 2;
+    content-align: center middle;
+    color: $text;
+}
+
+#profile-widget {
+    row-span: 1;
+    column-span: 1;
+}
+
+#cosmos-widget {
+    row-span: 1;
+    column-span: 2;
+}
+
+#forge-widget {
+    row-span: 1;
+    column-span: 1;
+}
+
+#brain-widget {
+    row-span: 2;
+    column-span: 1;
+}
+
+#quest-widget {
+    row-span: 2;
+    column-span: 2;
+}
+
+DataTable {
+    background: transparent;
+    border: none;
+}

@@ -1,0 +1,252 @@
+[
+    {
+        "text": "The terminal is mightier than the GUI.",
+        "author": "Ancient Proverb",
+        "category": "programming"
+    },
+    {
+        "text": "Every commit is a step forward.",
+        "author": "Synthevix",
+        "category": "programming"
+    },
+    {
+        "text": "Your streak is your superpower.",
+        "author": "Synthevix",
+        "category": "motivation"
+    },
+    {
+        "text": "Code like nobody's reviewing. Then review it anyway.",
+        "author": "Synthevix",
+        "category": "programming"
+    },
+    {
+        "text": "The best time to start was yesterday. The second best time is now.",
+        "author": "Unknown",
+        "category": "motivation"
+    },
+    {
+        "text": "Discipline is choosing between what you want now and what you want most.",
+        "author": "Abraham Lincoln",
+        "category": "wisdom"
+    },
+    {
+        "text": "It does not matter how slowly you go as long as you do not stop.",
+        "author": "Confucius",
+        "category": "wisdom"
+    },
+    {
+        "text": "The only way to do great work is to love what you do.",
+        "author": "Steve Jobs",
+        "category": "motivation"
+    },
+    {
+        "text": "First, solve the problem. Then, write the code.",
+        "author": "John Johnson",
+        "category": "programming"
+    },
+    {
+        "text": "Make it work, make it right, make it fast.",
+        "author": "Kent Beck",
+        "category": "programming"
+    },
+    {
+        "text": "Simplicity is the soul of efficiency.",
+        "author": "Austin Freeman",
+        "category": "programming"
+    },
+    {
+        "text": "Every expert was once a beginner.",
+        "author": "Unknown",
+        "category": "motivation"
+    },
+    {
+        "text": "The secret of getting ahead is getting started.",
+        "author": "Mark Twain",
+        "category": "motivation"
+    },
+    {
+        "text": "Push yourself, because no one else is going to do it for you.",
+        "author": "Unknown",
+        "category": "motivation"
+    },
+    {
+        "text": "Dream it. Wish it. Do it.",
+        "author": "Unknown",
+        "category": "motivation"
+    },
+    {
+        "text": "Small daily improvements over time lead to stunning results.",
+        "author": "Robin Sharma",
+        "category": "wisdom"
+    },
+    {
+        "text": "Don't watch the clock; do what it does. Keep going.",
+        "author": "Sam Levenson",
+        "category": "wisdom"
+    },
+    {
+        "text": "The harder you work for something, the greater you'll feel when you achieve it.",
+        "author": "Unknown",
+        "category": "motivation"
+    },
+    {
+        "text": "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+        "author": "Winston Churchill",
+        "category": "wisdom"
+    },
+    {
+        "text": "Believe you can and you're halfway there.",
+        "author": "Theodore Roosevelt",
+        "category": "motivation"
+    },
+    {
+        "text": "Any fool can write code that a computer can understand. Good programmers write code that humans can understand.",
+        "author": "Martin Fowler",
+        "category": "programming"
+    },
+    {
+        "text": "Talk is cheap. Show me the code.",
+        "author": "Linus Torvalds",
+        "category": "programming"
+    },
+    {
+        "text": "Programs must be written for people to read, and only incidentally for machines to execute.",
+        "author": "Harold Abelson",
+        "category": "programming"
+    },
+    {
+        "text": "The most disastrous thing that you can ever learn is your first programming language.",
+        "author": "Alan Kay",
+        "category": "programming"
+    },
+    {
+        "text": "It's not a bug – it's an undocumented feature.",
+        "author": "Unknown",
+        "category": "programming"
+    },
+    {
+        "text": "Computers are fast; programmers keep it slow.",
+        "author": "Unknown",
+        "category": "programming"
+    },
+    {
+        "text": "The function of good software is to make the complex appear to be simple.",
+        "author": "Grady Booch",
+        "category": "programming"
+    },
+    {
+        "text": "Good code is its own best documentation.",
+        "author": "Steve McConnell",
+        "category": "programming"
+    },
+    {
+        "text": "In order to be irreplaceable, one must always be different.",
+        "author": "Coco Chanel",
+        "category": "wisdom"
+    },
+    {
+        "text": "You are never too old to set another goal or to dream a new dream.",
+        "author": "C.S. Lewis",
+        "category": "wisdom"
+    },
+    {
+        "text": "Act as if what you do makes a difference. It does.",
+        "author": "William James",
+        "category": "wisdom"
+    },
+    {
+        "text": "What you get by achieving your goals is not as important as what you become by achieving your goals.",
+        "author": "Zig Ziglar",
+        "category": "wisdom"
+    },
+    {
+        "text": "We are what we repeatedly do. Excellence then is not an act, but a habit.",
+        "author": "Aristotle",
+        "category": "wisdom"
+    },
+    {
+        "text": "The man who moves a mountain begins by carrying away small stones.",
+        "author": "Confucius",
+        "category": "wisdom"
+    },
+    {
+        "text": "You don't have to be great to start, but you have to start to be great.",
+        "author": "Zig Ziglar",
+        "category": "motivation"
+    },
+    {
+        "text": "Start where you are. Use what you have. Do what you can.",
+        "author": "Arthur Ashe",
+        "category": "motivation"
+    },
+    {
+        "text": "Done is better than perfect.",
+        "author": "Sheryl Sandberg",
+        "category": "motivation"
+    },
+    {
+        "text": "Build something today, even if it's small.",
+        "author": "Synthevix",
+        "category": "programming"
+    },
+    {
+        "text": "Your future self will thank you for the habits you build today.",
+        "author": "Synthevix",
+        "category": "wisdom"
+    },
+    {
+        "text": "Consistency beats intensity every time.",
+        "author": "Synthevix",
+        "category": "motivation"
+    },
+    {
+        "text": "One more commit before midnight. You've got this.",
+        "author": "Synthevix",
+        "category": "programming"
+    },
+    {
+        "text": "The terminal is your canvas. Code is your art.",
+        "author": "Synthevix",
+        "category": "programming"
+    },
+    {
+        "text": "Level up your skills, one task at a time.",
+        "author": "Synthevix",
+        "category": "motivation"
+    },
+    {
+        "text": "Every bug fixed is a victory. Celebrate it.",
+        "author": "Synthevix",
+        "category": "programming"
+    },
+    {
+        "text": "Rest is not quitting. Rest is recharging.",
+        "author": "Synthevix",
+        "category": "wisdom"
+    },
+    {
+        "text": "The quieter you become, the more you can hear.",
+        "author": "Ram Dass",
+        "category": "wisdom"
+    },
+    {
+        "text": "An investment in knowledge pays the best interest.",
+        "author": "Benjamin Franklin",
+        "category": "wisdom"
+    },
+    {
+        "text": "Learning never exhausts the mind.",
+        "author": "Leonardo da Vinci",
+        "category": "wisdom"
+    },
+    {
+        "text": "The expert in anything was once a beginner.",
+        "author": "Helen Hayes",
+        "category": "motivation"
+    },
+    {
+        "text": "Progress, not perfection.",
+        "author": "Synthevix",
+        "category": "motivation"
+    }
+]

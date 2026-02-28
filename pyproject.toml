@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "synthevix"
+version = "1.0.0"
+description = "Your Personal Terminal Command Center"
+authors = ["Commander"]
+readme = "README.md"
+license = "MIT"
+packages = [{include = "synthevix"}]
+
+[tool.poetry.scripts]
+synthevix = "synthevix.main:app"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+typer = {version = ">=0.15.0"}
+rich = ">=13.7.0"
+toml = "^0.10.2"
+requests = "^2.31.0"
+questionary = ">=2.0.0"
+textual = "^0.50.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-cov = "^5.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"

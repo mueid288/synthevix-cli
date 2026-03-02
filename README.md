@@ -16,7 +16,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![Built with Typer](https://img.shields.io/badge/CLI-Typer-009485?style=flat-square)](https://typer.tiangolo.com/)
 [![Powered by Rich](https://img.shields.io/badge/output-Rich-blueviolet?style=flat-square)](https://rich.readthedocs.io/)
-[![Status: Phase 1 – Active](https://img.shields.io/badge/status-Phase%201%20%E2%80%93%20Active-ff69b4?style=flat-square)]()
+[![Status: v1.0 – Stable](https://img.shields.io/badge/status-v1.0%20%E2%80%93%20Stable-brightgreen?style=flat-square)]()
 
 </div>
 
@@ -30,9 +30,9 @@ It combines four powerful modules into a single, beautifully designed terminal e
 
 | Module | Description |
 |--------|-------------|
-| 🧠 **Brain** | Personal knowledge base — notes, journals, snippets, bookmarks |
-| 🎮 **Quest** | Gamified task manager with XP, levels, streaks, and achievements |
-| 🌌 **Cosmos** | Mood & wellness tracking with time-aware greetings and quotes |
+| 🧠 **Brain** | Personal knowledge base — notes, journals, snippets, bookmarks with FTS5 full-text search |
+| 🎮 **Quest** | Gamified task manager with XP, levels, streaks, rank titles, and achievements |
+| 🌌 **Cosmos** | Mood & wellness tracking with reflection prompts, weather, and 4-week insights |
 | 🛠️ **Forge** | Developer toolkit — project scaffolding, git helpers, coding streaks |
 
 > **Personal First.** Synthevix is designed for a single user. No accounts, no cloud, no telemetry. Everything lives locally on your machine.
@@ -51,12 +51,12 @@ It combines four powerful modules into a single, beautifully designed terminal e
   - [🎮 Quest](#-quest--gamified-task-management)
   - [🌌 Cosmos](#-cosmos--mood--wellness)
   - [🛠️ Forge](#️-forge--developer-tools)
+- [TUI Dashboard](#tui-dashboard)
 - [Configuration](#configuration)
 - [Theming](#theming)
 - [Database & Storage](#database--storage)
 - [Full Command Reference](#full-command-reference)
 - [Architecture](#architecture)
-- [Development Roadmap](#development-roadmap)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -66,7 +66,7 @@ It combines four powerful modules into a single, beautifully designed terminal e
 
 - **Personal First** — Every feature is tailored to a single user's workflow and preferences.
 - **Beauty Matters** — Rich colors, animations, and thoughtful design elevate the terminal experience.
-- **Gamification Drives Consistency** — XP, levels, streaks, and achievements turn mundane tasks into rewarding challenges.
+- **Gamification Drives Consistency** — XP, levels, streaks, rank titles, and achievements turn mundane tasks into rewarding challenges.
 - **Everything in One Place** — No context-switching between 10 different tools. Notes, tasks, mood, dev tools — all unified.
 - **Offline First** — All data is stored locally. No accounts, no cloud dependency, no telemetry.
 
@@ -76,14 +76,20 @@ It combines four powerful modules into a single, beautifully designed terminal e
 
 - ✨ **Animated ASCII banner** on launch with theme-matched colors
 - 🕰️ **Time-aware personalized greetings** (morning / afternoon / evening / night)
-- 🖥️ **Interactive TUI Dashboard** featuring a 30-day GitHub-style coding heatmap and 7-day mood sparklines
-- 🔔 **Global Audio Chimes** for Pomodoro completions and leveling up
-- 📝 **Brain** — capture notes, journal entries, code snippets, and bookmarks with full-text search
+- 🧠 **Brain resurface** — a random past note is shown on the welcome screen to rediscover old ideas
+- 🖥️ **Interactive TUI Dashboard** with a 30-day coding heatmap, 7-day mood sparklines, and live quest list
+- 🎖️ **Rank Title System** — progress from Recruit → Initiate → Operative → Specialist → Commander → Warlord → Legendary → Mythic
+- 🍅 **Pomodoro Focus Timer** with pause/resume/skip controls, session history, and XP integration
+- 🔔 **Sound Effects** — terminal chimes for quest completions, level-ups, and failures
+- 📅 **Quest Calendar** — 4-week GitHub-style heatmap of completed quests
+- 📋 **Quest Templates** — load curated quest packs (workout, coding, cleaning) in seconds
+- 📝 **Brain** — capture notes, journals, code snippets, and bookmarks with instant **FTS5 full-text search**
+- 🏷️ **Brain Tag Cloud** — frequency-scaled visual tag overview across all entries
 - ⚔️ **Quest** — RPG-style task management with XP, leveling, streaks, achievements, and daily challenges
-- 🚨 **Focus Mode** — Pomodoro focus timers directly integrated into the XP engine
-- 💜 **Cosmos** — mood & energy logging, reflection prompts, weather, and motivational quotes
-- ⚒️ **Forge** — project scaffolding from templates, git quick-commands, coding streak heatmap, and alias management
-- 🎨 **6 built-in color themes** (Cyberpunk, Dracula, Nord, Synthwave, Monokai, Solarized) + custom themes
+- 🌿 **Cosmos Reflect** — 20 guided reflection prompts that auto-save as tagged journal entries
+- 📊 **Cosmos Insights** — 4-week mood trend analysis with `--full` deep-dive mode
+- 🌤️ **Weather** — cached weather display (30-min TTL) with typed error handling for bad API keys and network issues
+- 🎨 **8 built-in color themes** (Cyberpunk, Dracula, Nord, Synthwave, Monokai, Solarized, Tokyo Night, Catppuccin Mocha) + custom themes
 - 🗄️ **Local SQLite database** at `~/.synthevix/data.db` — fully offline, fully private
 - 🔧 **TOML-based configuration** at `~/.synthevix/config.toml`
 - 🐚 **Shell completion** for bash, zsh, and fish
@@ -101,13 +107,13 @@ It combines four powerful modules into a single, beautifully designed terminal e
 
 ### Install Globally (Recommended)
 
-The easiest way to install Synthevix so it's available everywhere on your system is using [`pipx`](https://pipx.pypa.io/):
+The easiest way to install Synthevix so it's available everywhere is using [`pipx`](https://pipx.pypa.io/):
 
 ```bash
 pipx install git+https://github.com/mueid288/synthevix-cli.git
 ```
 
-### Install from source (Development)
+### Install from Source (Development)
 
 ```bash
 # Clone the repository
@@ -125,7 +131,7 @@ poetry install
 pip install -e .
 ```
 
-### Verify installation
+### Verify Installation
 
 ```bash
 synthevix --version
@@ -148,8 +154,20 @@ synthevix quest add "Set up my dotfiles" --diff medium
 # Complete a quest and earn XP
 synthevix quest complete 1
 
+# Start a 25-minute focus session
+synthevix quest focus --minutes 25
+
 # Log your mood
 synthevix cosmos mood --mood 5 --energy 8
+
+# Run a guided reflection
+synthevix cosmos reflect
+
+# View your mood insights
+synthevix cosmos insights --full
+
+# Load a preset quest pack
+synthevix quest template coding
 
 # Scaffold a new project
 synthevix forge init --template fastapi
@@ -174,33 +192,37 @@ Running `synthevix` with no subcommand displays the full launch screen:
   🌅  Rise and grind, Commander. New day, new XP.
   ✨  "Every commit is a step forward." — Synthevix
 
-  ┌─────────────────────────────────────┐
-  │  ⚔  Level 7  ░░░░░░████████░  62%  │
-  │  📋  Active Quests: 3               │
-  │  🔥  Current Streak: 12 days        │
-  │  💜  Today's Mood: 😄 Great         │
-  │  💻  Coding Streak: 9 days          │
-  └─────────────────────────────────────┘
+  ┌──────────────────────────────────────────┐
+  │  ⚔  Level 7  [Operative]                │
+  │  ░░░░░░████████░  62%  (3,200 / 5,170)  │
+  │  📋  Active Quests: 3                    │
+  │  🔥  Current Streak: 12 days             │
+  │  💜  Today's Mood: 😄 Great              │
+  │  💻  Coding Streak: 9 days               │
+  └──────────────────────────────────────────┘
+
+  💡 Brain Resurface: "Use dataclasses for config objects in Python"
 
 ? What do you want to do?
-  ── Quick Actions ─────────────────────────────────────
+  ── Quick Actions ────────────────────────────────────
    🖥  Launch TUI Dashboard
    📊  Full stats overview
-  ── Brain ─────────────────────────────────────────────
+   🍅  Start focus timer
+  ── Brain ────────────────────────────────────────────
    📝  Add note
    📓  Add journal entry
    ...
-
 ```
 
 **Components:**
 
 | Component | Description |
 |-----------|-------------|
-| **Animated Banner** | Stylized "SYNTHEVIX" logo in the active theme color with a smooth fade-in |
+| **Animated Banner** | Stylized "SYNTHEVIX" logo in the active theme color |
 | **Time-Based Greeting** | Personalized message that adapts to morning, afternoon, evening, or night |
 | **Motivational Quote** | Random quote from a curated collection |
-| **Quick Stats Panel** | Level, XP progress bar, active quest count, streak, mood, coding streak |
+| **Quick Stats Panel** | Level, rank title, XP progress bar, quest count, streak, mood, coding streak |
+| **Brain Resurface** | A random past entry shown to rediscover useful old notes |
 
 ---
 
@@ -210,19 +232,19 @@ Running `synthevix` with no subcommand displays the full launch screen:
 
 ### 🧠 Brain — Knowledge Management
 
-Brain is your personal second brain in the terminal. Capture, organize, and resurface notes, journal entries, code snippets, and bookmarks without ever leaving the command line. Backed by ultra-fast **FTS5 SQLite** search, finding old notes is instant.
+Brain is your personal second brain in the terminal. Capture, organize, and resurface notes, journal entries, code snippets, and bookmarks without ever leaving the command line. Backed by ultra-fast **FTS5 SQLite** full-text search.
 
 #### Commands
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `brain add` | Add a new note, journal entry, or snippet | `synthevix brain add --type note --tag python` |
+| `brain add` | Add a new note, journal entry, snippet, or bookmark | `synthevix brain add --type note --tag python` |
 | `brain list` | List entries with optional filters | `synthevix brain list --type journal --last 7d` |
-| `brain search` | Full-text search across all entries | `synthevix brain search "async patterns"` |
+| `brain search` | Full-text search across all entries (FTS5) | `synthevix brain search "async patterns"` |
 | `brain view <id>` | View a specific entry by ID | `synthevix brain view 42` |
 | `brain edit <id>` | Edit an existing entry | `synthevix brain edit 42` |
 | `brain delete <id>` | Delete an entry (with confirmation) | `synthevix brain delete 42` |
-| `brain tags` | List all tags with entry counts | `synthevix brain tags` |
+| `brain tags` | Visual tag cloud with frequency-scaled weights | `synthevix brain tags` |
 | `brain export` | Export entries to Markdown or JSON | `synthevix brain export --format md` |
 | `brain random` | Surface a random past entry for review | `synthevix brain random` |
 
@@ -235,27 +257,67 @@ Brain is your personal second brain in the terminal. Capture, organize, and resu
 | **snippet** | Code snippets with syntax highlighting, language detection, and copy-to-clipboard. |
 | **bookmark** | URLs with title, description, and tags for quick reference. |
 
+#### Search
+
+Brain search uses **FTS5 full-text search** across title, content, and tags for instant results. Falls back to `LIKE` search on systems without FTS5. All entries added through any command are automatically indexed via database triggers.
+
 ---
 
 ### 🎮 Quest — Gamified Task Management
 
-Quest transforms your to-do list into an RPG-style progression system. Every task completed earns XP. Consistent work builds streaks. Milestones unlock achievements. Your terminal becomes your arena.
+Quest transforms your to-do list into an RPG-style progression system. Every task completed earns XP. Consistent work builds streaks. Milestones unlock achievements. Your rank title reflects your journey.
 
 #### Commands
 
 | Command | Description | Example |
 |---------|-------------|---------|
 | `quest add <title>` | Add a new quest with optional difficulty/recurrence | `synthevix quest add "Fix auth bug" --diff hard --repeat daily` |
-| `quest list` | List active quests by status/priority | `synthevix quest list --status active` |
+| `quest list` | List active quests by status | `synthevix quest list --status active` |
 | `quest complete <id>` | Mark a quest as done and earn XP | `synthevix quest complete 7` |
 | `quest fail <id>` | Mark a quest as failed (XP penalty) | `synthevix quest fail 7` |
-| `quest delete <id>` | Delete a quest entirely | `synthevix quest delete 7` |
-| `quest reset <id>` | Reset a completed recurring quest | `synthevix quest reset 7` |
-| `quest pomodoro` | Start an immersive focus timer | `synthevix quest pomodoro 25` |
-| `quest stats` | View XP, level, streak, and achievements | `synthevix quest stats` |
+| `quest delete <id>` | Delete a quest entirely (with confirmation) | `synthevix quest delete 7` |
+| `quest reset <id>` | Reactivate a completed recurring quest | `synthevix quest reset 7` |
+| `quest focus` | Start an interactive Pomodoro focus timer | `synthevix quest focus --minutes 25` |
+| `quest focus --history` | View last 10 Pomodoro sessions | `synthevix quest focus --history` |
+| `quest calendar` | View a 4-week heatmap of completed quests | `synthevix quest calendar` |
+| `quest template <name>` | Load a preset quest pack | `synthevix quest template coding` |
+| `quest stats` | View XP, level, rank, streak, and achievements | `synthevix quest stats` |
 | `quest achievements` | View all achievements and progress | `synthevix quest achievements` |
 | `quest history` | View completed/failed quest log | `synthevix quest history --last 30d` |
-| `quest daily` | Generate daily challenge quests | `synthevix quest daily` |
+| `quest daily` | Generate today's daily challenge quests | `synthevix quest daily` |
+
+#### Pomodoro Focus Timer
+
+`synthevix quest focus` launches an interactive countdown timer with live controls:
+
+| Key | Action |
+|-----|--------|
+| `p` | Pause / Resume |
+| `s` | Skip this session |
+| `Enter` | Mark complete early |
+| `Ctrl+C` | Abort without logging |
+
+Completed sessions are logged to `pomodoro_sessions` in the database. The Dashboard ProfileWidget shows **today's Pomodoro count** in real time. A completed session also grants a small XP bonus.
+
+#### Quest Templates
+
+Load curated quest packs in seconds:
+
+| Template | Contents |
+|----------|----------|
+| `workout` | 100 Pushups (hard, daily), 5km Run (epic), Stretching Routine (easy, daily) |
+| `coding` | 1 LeetCode Problem (medium, daily), Read 1 Tech Article (easy, daily), Contribute to Open Source (legendary, weekly) |
+| `cleaning` | Vacuum the house (medium, weekly), Take out trash (trivial, weekly), Clean desk (easy, daily) |
+
+```bash
+synthevix quest template workout
+```
+
+Each quest in the pack prompts for confirmation before being added.
+
+#### Quest Calendar
+
+`synthevix quest calendar` renders a 4-week completion heatmap directly in the terminal, similar to GitHub's contribution graph, showing which days you completed quests.
 
 #### XP & Difficulty System
 
@@ -282,6 +344,21 @@ XP required for next level = 100 × (current_level ^ 1.5)
 | 20 → 21 | 8,944 | 102,390 |
 | 50 → 51 | 35,355 | 950,000+ |
 
+#### Rank Title System
+
+Your rank title is displayed on your profile and in the TUI Dashboard alongside your level:
+
+| Level Range | Rank Title |
+|-------------|------------|
+| 1–4 | Recruit |
+| 5–9 | Initiate |
+| 10–14 | Operative |
+| 15–19 | Specialist |
+| 20–24 | Commander |
+| 25–34 | Warlord |
+| 35–49 | Legendary |
+| 50+ | Mythic |
+
 #### Achievements
 
 | Achievement | Condition | Reward |
@@ -300,27 +377,54 @@ XP required for next level = 100 × (current_level ^ 1.5)
 - A **streak** is maintained by completing at least one quest per day.
 - Streaks reset at a configurable hour (default: **4:00 AM**).
 - Streak bonuses are additive per-day — the longer your streak, the more XP per task.
-- Losing a streak triggers a "Streak Lost" notification with encouragement to start again.
 - **Streak Shields:** Earn 1 shield per 7-day streak. A shield protects your streak for 1 missed day.
+
+#### Sound Effects
+
+Synthevix plays audio cues for key events:
+
+| Event | Sound |
+|-------|-------|
+| Quest completed | Single terminal bell |
+| Level up | Three ascending terminal bells |
+| Quest failed | System sound (`Basso.aiff` on macOS) |
 
 ---
 
 ### 🌌 Cosmos — Mood & Wellness
 
-Cosmos turns your terminal into a mindful companion. Track your mood and energy levels, receive time-aware greetings, get motivational quotes, and visualize your emotional patterns over time.
+Cosmos turns your terminal into a mindful companion. Track your mood and energy levels, receive time-aware greetings, run guided reflections, check the weather, and visualize your emotional patterns.
 
 #### Commands
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `cosmos mood` | Log your current mood and energy | `synthevix cosmos mood --mood happy --energy 8` |
+| `cosmos mood` | Log your current mood and energy | `synthevix cosmos mood --mood 5 --energy 8` |
 | `cosmos history` | View mood history with ASCII charts | `synthevix cosmos history --last 30d` |
 | `cosmos quote` | Get a random motivational quote | `synthevix cosmos quote` |
-| `cosmos weather` | Show current weather | `synthevix cosmos weather` |
-| `cosmos greet` | Get a personalized greeting | `synthevix cosmos greet` |
-| `cosmos reflect` | Prompt a guided reflection | `synthevix cosmos reflect` |
-| `cosmos insights` | View 4-week mood pattern insights | `synthevix cosmos insights` |
-| `config test-weather` | Verify your Weather API key | `synthevix config test-weather` |
+| `cosmos weather` | Show current weather (cached 30 min) | `synthevix cosmos weather` |
+| `cosmos greet` | Get a personalized time-based greeting | `synthevix cosmos greet` |
+| `cosmos reflect` | Run a guided reflection session | `synthevix cosmos reflect` |
+| `cosmos insights` | View mood pattern summary | `synthevix cosmos insights` |
+| `cosmos insights --full` | Full 4-week trend with daily breakdown | `synthevix cosmos insights --full` |
+
+#### Guided Reflection (`cosmos reflect`)
+
+Each `cosmos reflect` session randomly selects one of 20 curated prompts covering themes like gratitude, obstacles, energy, priorities, and growth. Your response is automatically saved as a **journal entry** in Brain with the `#reflection` tag, creating a searchable reflection archive over time.
+
+#### Mood Insights (`cosmos insights`)
+
+`cosmos insights` shows a 4-week mood pattern summary including average mood, energy trends, and most common moods. Add `--full` for a day-by-day breakdown of the past 7 days plus the 4-week rolling average.
+
+#### Weather (`cosmos weather`)
+
+Weather data is fetched from OpenWeatherMap and **cached for 30 minutes** in `~/.synthevix/weather_cache.json`. Errors are categorized by type:
+
+| Error Type | Cause |
+|------------|-------|
+| `auth` | Invalid or missing API key |
+| `location` | City/coordinates not found |
+| `network` | No internet connection or timeout |
 
 #### Mood Scale
 
@@ -369,11 +473,11 @@ Forge is your personal dev toolkit. Scaffold projects from templates, manage reu
 | `forge init` | Scaffold a new project from a template | `synthevix forge init --template fastapi` |
 | `forge templates` | List and manage project templates | `synthevix forge templates` |
 | `forge snippet` | Manage saved code snippets | `synthevix forge snippet add --lang py` |
-| `forge streak` | View your coding streak (git-based) | `synthevix forge streak` |
+| `forge streak` | View your coding streak and heatmap | `synthevix forge streak` |
 | `forge git <action>` | Automated git workflows | `synthevix forge git quicksave` |
 | `forge alias` | Manage custom command aliases | `synthevix forge alias add gs "git status"` |
 | `synthevix <alias>` | Execute an alias directly | `synthevix gp` |
-| `forge stats` | Dev stats: commits, lines, etc. | `synthevix forge stats --last 7d` |
+| `forge stats` | Dev stats: commits, lines, repos | `synthevix forge stats --last 7d` |
 
 #### Built-in Project Templates
 
@@ -387,8 +491,8 @@ Forge is your personal dev toolkit. Scaffold projects from templates, manage reu
 
 #### Git Quick Commands
 
-| Alias | Description | Equivalent |
-|-------|-------------|------------|
+| Command | Description | Equivalent |
+|---------|-------------|------------|
 | `forge git quicksave` | Stage all changes and commit with a timestamp | `git add -A && git commit -m "quicksave: YYYY-MM-DD HH:MM"` |
 | `forge git undo` | Undo last commit, keep changes staged | `git reset --soft HEAD~1` |
 | `forge git cleanup` | Prune merged local branches | `git branch --merged \| xargs git branch -d` |
@@ -401,7 +505,44 @@ Forge tracks your daily coding activity by scanning git commit history across co
 - A **coding day** is any calendar day with at least 1 commit.
 - Streak resets if no commits are made by the configured reset hour (default: 4:00 AM).
 - Streak data feeds into the Quest XP system — unlocks the **🚀 Code Machine** achievement.
-- Visual **contribution heatmap** display similar to GitHub's activity graph.
+- The TUI Dashboard shows a **30-day contribution heatmap** in the Forge widget.
+
+---
+
+## TUI Dashboard
+
+Launch the full-screen Textual dashboard with:
+
+```bash
+synthevix
+# then select "Launch TUI Dashboard" from the menu
+```
+
+The dashboard is a live-updating split-pane interface divided into five widgets:
+
+| Widget | Location | Contents |
+|--------|----------|----------|
+| **Profile** | Top-left | Level, rank title, XP bar, current & longest streak, today's Pomodoro count |
+| **Cosmos** | Top-center + right | Mood score, last mood log, 7-day sparkline chart |
+| **Forge** | Middle-left | Current coding streak, 30-day GitHub-style commit heatmap |
+| **Brain** | Bottom-left | Recent entry count, last entry title, quick-add prompt |
+| **Quest** | Bottom-center + right | Live active quest list with difficulty, status, and due dates |
+
+### Dashboard Keybindings
+
+| Key | Action |
+|-----|--------|
+| `q` | Quit dashboard |
+| `r` | Refresh all widgets |
+| `c` | Complete selected quest |
+| `f` | Fail selected quest |
+| `d` | Delete selected quest |
+| `a` | Add a new quest |
+| `b` | View Brain entries |
+
+### Level-Up Animation
+
+When you complete a quest in the dashboard and level up, the Profile widget flashes with a 3-step border animation to celebrate your new rank.
 
 ---
 
@@ -413,7 +554,7 @@ Synthevix is configured via a TOML file located at `~/.synthevix/config.toml`.
 [general]
 username = "Commander"
 greeting_style = "cyberpunk"       # Personality of greetings
-sound_enabled = true               # Terminal bell on launch
+sound_enabled = true               # Terminal bell on events
 launch_banner = true               # Show ASCII banner on launch
 
 [theme]
@@ -444,12 +585,18 @@ xp_multiplier = 1.0                # Global XP multiplier (1.0 = default)
 |---------|-------------|
 | `synthevix config edit` | Open `config.toml` in your `$EDITOR` |
 | `synthevix config reset` | Reset all settings to defaults |
+| `synthevix config theme list` | Show all themes with color previews |
+| `synthevix config theme set <name>` | Switch to a new theme |
+| `synthevix config theme preview <name>` | Preview a theme without applying |
+| `synthevix config theme create` | Build a custom theme interactively |
+| `synthevix config test-weather` | Verify your OpenWeatherMap API key |
+| `synthevix config shell-completion` | Print shell completion install instructions |
 
 ---
 
 ## Theming
 
-Synthevix ships with 6 beautiful built-in themes. Every piece of output — ASCII art, tables, panels, progress bars, and text highlights — respects the active theme.
+Synthevix ships with **8 built-in themes**. Every piece of output — ASCII art, tables, panels, progress bars, and text highlights — respects the active theme.
 
 ### Built-in Themes
 
@@ -461,15 +608,8 @@ Synthevix ships with 6 beautiful built-in themes. Every piece of output — ASCI
 | **Synthwave** | `#FF6AD5` Pink | `#C774E8` Violet | Retro 80s |
 | **Monokai** | `#A6E22E` Green | `#FD971F` Orange | Developer classic |
 | **Solarized** | `#268BD2` Blue | `#2AA198` Teal | Warm, balanced |
-
-### Theme Commands
-
-| Command | Description |
-|---------|-------------|
-| `synthevix config theme list` | Show all themes with color previews |
-| `synthevix config theme set <name>` | Switch to a new theme |
-| `synthevix config theme preview <name>` | Preview without applying |
-| `synthevix config theme create` | Build a custom theme interactively |
+| **Tokyo Night** | `#7AA2F7` Blue | `#F7768E` Red | Dark & cinematic |
+| **Catppuccin Mocha** | `#B4BEFE` Lavender | `#FAB387` Peach | Soft pastel dark |
 
 ### Custom Theme Format
 
@@ -499,101 +639,115 @@ All data is stored locally. No cloud. No telemetry.
 
 ```
 ~/.synthevix/
-├── data.db           # SQLite database (all module data)
-├── config.toml       # User configuration
-├── themes/           # Custom theme files
+├── data.db              # SQLite database (all module data)
+├── config.toml          # User configuration
+├── weather_cache.json   # Weather API cache (30-min TTL, auto-managed)
+├── themes/              # Custom theme files
 │   └── my_theme.toml
-├── templates/        # Custom project scaffolding templates
+├── templates/           # Custom project scaffolding templates
 │   └── my_template/
-├── exports/          # Exported brain entries (Markdown / JSON)
-└── backups/          # Auto-backups created before schema migrations
+├── exports/             # Exported brain entries (Markdown / JSON)
+└── backups/             # Auto-backups created before schema migrations
 ```
 
-### Database Schema (Summary)
+### Database Schema
 
 | Table | Module | Purpose |
 |-------|--------|---------|
 | `brain_entries` | Brain | Notes, journals, snippets, bookmarks |
-| `quests` | Quest | Task records with difficulty, status, XP |
+| `brain_fts` | Brain | FTS5 virtual table for full-text search |
+| `quests` | Quest | Task records with difficulty, status, XP, recurrence |
 | `user_profile` | Quest | XP, level, streak, shields |
-| `achievements` | Quest | Achievement definitions |
-| `user_achievements` | Quest | Unlocked achievements |
+| `achievements` | Quest | Achievement definitions (seeded on init) |
+| `user_achievements` | Quest | Unlocked achievements with timestamps |
+| `pomodoro_sessions` | Quest | Completed focus session log |
 | `mood_logs` | Cosmos | Mood and energy entries |
 | `coding_streaks` | Forge | Daily commit records per repo |
 | `forge_templates` | Forge | Saved project templates |
 | `forge_aliases` | Forge | Custom command aliases |
+| `schema_version` | Core | Migration tracking |
 
-### Backup & Import
+### Backups
+
+A timestamped backup of `data.db` is created automatically before each schema migration. Manual backups can be created at any time:
 
 ```bash
-synthevix backup             # Create a manual backup of data.db
-synthevix export             # Export all data to a portable archive
-synthevix import <file>      # Import from a previously exported archive
+synthevix backup
 ```
+
+Backups are stored in `~/.synthevix/backups/data_YYYYMMDD_HHMMSS.db`.
 
 ---
 
 ## Full Command Reference
 
 ```
-synthevix                           # Launch screen (banner + stats)
+synthevix                           # Launch screen (banner + stats + menu)
 synthevix --help                    # Show all commands
 synthevix --version                 # Show version
 
-# ── Brain ────────────────────────────────────────────────────────────────
+# ── Brain ─────────────────────────────────────────────────────────────────
 synthevix brain add                 # Add entry (interactive)
 synthevix brain list                # List all entries
-synthevix brain search <query>      # Full-text search
+synthevix brain search <query>      # Full-text search (FTS5)
 synthevix brain view <id>           # View entry by ID
 synthevix brain edit <id>           # Edit entry by ID
 synthevix brain delete <id>         # Delete entry (with confirmation)
-synthevix brain tags                # List all tags with counts
+synthevix brain tags                # Visual tag cloud with frequency weights
 synthevix brain export              # Export entries to Markdown / JSON
 synthevix brain random              # Surface a random past entry
 
-# ── Quest ────────────────────────────────────────────────────────────────
+# ── Quest ─────────────────────────────────────────────────────────────────
 synthevix quest add <title>         # Add a new quest
-synthevix quest list                # List quests (filterable)
-synthevix quest complete <id>       # Complete quest, earn XP
-synthevix quest fail <id>           # Fail quest
-synthevix quest stats               # XP, level, and streak overview
-synthevix quest achievements        # View all achievements
+synthevix quest list                # List quests (filterable by status)
+synthevix quest complete <id>       # Complete quest, earn XP + sound effect
+synthevix quest fail <id>           # Fail quest (XP penalty + sound)
+synthevix quest delete <id>         # Delete quest (with confirmation)
+synthevix quest reset <id>          # Reactivate a recurring quest
+synthevix quest focus               # Start Pomodoro timer (25 min default)
+synthevix quest focus --minutes 50  # Custom duration
+synthevix quest focus --history     # View last 10 Pomodoro sessions
+synthevix quest calendar            # 4-week quest completion heatmap
+synthevix quest template <name>     # Load preset quest pack (workout/coding/cleaning)
+synthevix quest stats               # XP, level, rank, streak overview
+synthevix quest achievements        # View all achievements and progress
 synthevix quest history             # Completed / failed quest log
 synthevix quest daily               # Generate daily challenge quests
 
-# ── Cosmos ───────────────────────────────────────────────────────────────
+# ── Cosmos ────────────────────────────────────────────────────────────────
 synthevix cosmos mood               # Log mood and energy
 synthevix cosmos history            # Mood history with charts
 synthevix cosmos quote              # Random motivational quote
-synthevix cosmos weather            # Current weather (requires API key)
+synthevix cosmos weather            # Current weather (cached 30 min)
 synthevix cosmos greet              # Time-based personalized greeting
-synthevix cosmos reflect            # Guided reflection prompt
-synthevix cosmos insights           # Mood pattern insights
+synthevix cosmos reflect            # Guided reflection (saves to Brain)
+synthevix cosmos insights           # 4-week mood pattern summary
+synthevix cosmos insights --full    # Full 7-day breakdown + trend
 
-# ── Forge ────────────────────────────────────────────────────────────────
+# ── Forge ─────────────────────────────────────────────────────────────────
 synthevix forge init                # Scaffold a new project
 synthevix forge templates           # List / manage templates
 synthevix forge snippet             # Manage code snippets
-synthevix forge streak              # View coding streak and heatmap
+synthevix forge streak              # View coding streak and 30-day heatmap
 synthevix forge git <action>        # Git quick commands
 synthevix forge alias               # Manage command aliases
 synthevix forge stats               # Dev statistics
 
-# ── Config ───────────────────────────────────────────────────────────────
-synthevix config theme list         # List all themes
+# ── Config ────────────────────────────────────────────────────────────────
+synthevix config theme list         # List all 8 built-in themes
 synthevix config theme set <name>   # Set active theme
-synthevix config theme preview <n>  # Preview a theme
+synthevix config theme preview <n>  # Preview a theme without applying
 synthevix config theme create       # Create custom theme (interactive)
 synthevix config edit               # Open config in $EDITOR
 synthevix config reset              # Reset config to defaults
+synthevix config test-weather       # Verify OpenWeatherMap API key
+synthevix config shell-completion   # Print shell completion setup instructions
 
-# ── Global ───────────────────────────────────────────────────────────────
-synthevix                           # Launch screen (banner + stats)
-synthevix stats                     # Full overview dashboard
-synthevix <alias>                   # Execute custom alias directly
-synthevix backup                    # Manual backup
-synthevix import <file>             # Import data archive
-synthevix export                    # Export all data
+# ── Aliases ───────────────────────────────────────────────────────────────
+synthevix <alias>                   # Execute a saved alias directly (e.g. 'synthevix gp')
+
+# ── Backup ────────────────────────────────────────────────────────────────
+synthevix backup                    # Create a timestamped backup of data.db
 ```
 
 ---
@@ -607,8 +761,8 @@ synthevix export                    # Export all data
 | Language | Python 3.11+ | Core application language |
 | CLI Framework | [Typer](https://typer.tiangolo.com/) | Command parsing, help generation, shell completion |
 | Rich Output | [Rich](https://rich.readthedocs.io/) | Tables, panels, progress bars, syntax highlighting |
-| TUI (Phase 2) | [Textual](https://textual.textualize.io/) | Full-screen terminal UI dashboard |
-| Database | SQLite3 (stdlib) | Local persistent storage — no external DB server |
+| TUI | [Textual](https://textual.textualize.io/) | Full-screen terminal UI dashboard |
+| Database | SQLite3 (stdlib) + FTS5 | Local persistent storage with full-text search |
 | Config | TOML | Human-readable user configuration |
 | Packaging | [Poetry](https://python-poetry.org/) | Dependency management and packaging |
 | Testing | [Pytest](https://pytest.org/) | Unit and integration tests |
@@ -617,55 +771,59 @@ synthevix export                    # Export all data
 
 ```
 synthevix-cli/
-├── synthevix/                  # Main package
+├── synthevix/                   # Main package
 │   ├── __init__.py
-│   ├── main.py                 # Entry point, ASCII banner, greeting
-│   ├── brain/                  # 🧠 Brain module
-│   │   ├── __init__.py
-│   │   ├── commands.py         # Typer command definitions
-│   │   ├── models.py           # Data models & DB operations
-│   │   └── display.py          # Rich formatting for brain output
-│   ├── quest/                  # 🎮 Quest module
-│   │   ├── __init__.py
-│   │   ├── commands.py
-│   │   ├── models.py
-│   │   ├── xp.py               # XP calculation & leveling logic
-│   │   ├── achievements.py     # Achievement definitions & tracking
-│   │   └── display.py
-│   ├── cosmos/                 # 🌌 Cosmos module
-│   │   ├── __init__.py
-│   │   ├── commands.py
-│   │   ├── models.py
-│   │   ├── greetings.py        # Time-based greeting engine
-│   │   ├── quotes.py           # Quote collection & rotation
-│   │   ├── weather.py          # OpenWeatherMap API integration
-│   │   └── display.py
-│   ├── forge/                  # 🛠️ Forge module
-│   │   ├── __init__.py
-│   │   ├── commands.py
-│   │   ├── models.py
-│   │   ├── templates.py        # Project scaffolding engine
-│   │   ├── git_helpers.py      # Git automation helpers
-│   │   └── display.py
-│   ├── core/                   # Shared utilities
-│   │   ├── __init__.py
-│   │   ├── database.py         # SQLite connection & migrations
-│   │   ├── config.py           # TOML config management
-│   │   ├── themes.py           # Theme engine
-│   │   ├── banner.py           # ASCII art & animations
-│   │   └── utils.py            # Shared helper functions
-│   └── assets/                 # Static assets
-│       ├── banner.txt          # ASCII art variants
-│       ├── quotes.json         # Curated quote collection
-│       └── templates/          # Built-in project template files
-├── tests/                      # Test suite
+│   ├── main.py                  # Entry point, banner, greeting, alias interceptor
+│   ├── brain/                   # 🧠 Brain module
+│   │   ├── commands.py          # Typer commands (add, list, search, tags, export, random)
+│   │   ├── models.py            # DB operations, FTS5 search
+│   │   └── display.py           # Rich formatting (tag cloud, tables)
+│   ├── quest/                   # 🎮 Quest module
+│   │   ├── commands.py          # Typer commands (add, complete, fail, focus, calendar, template…)
+│   │   ├── models.py            # XP, leveling, streaks, pomodoro logging
+│   │   ├── xp.py                # XP calculation & level threshold math
+│   │   ├── achievements.py      # Achievement checking & unlocking
+│   │   ├── pomodoro.py          # Interactive Pomodoro timer with pause/resume
+│   │   └── display.py           # Rich formatting (quest tables, XP bar, calendar)
+│   ├── cosmos/                  # 🌌 Cosmos module
+│   │   ├── commands.py          # Typer commands (mood, history, quote, weather, reflect, insights)
+│   │   ├── models.py            # Mood CRUD and analytics
+│   │   ├── reflect.py           # Guided reflection engine (20 prompts)
+│   │   ├── greetings.py         # Time-based greeting engine
+│   │   ├── quotes.py            # Quote collection & rotation
+│   │   ├── weather.py           # OpenWeatherMap integration with caching + WeatherError
+│   │   └── display.py           # Rich formatting (mood charts, sparklines)
+│   ├── forge/                   # 🛠️ Forge module
+│   │   ├── commands.py          # Typer commands (init, streak, git, alias, stats)
+│   │   ├── models.py            # Coding streak tracking
+│   │   ├── templates.py         # Project scaffolding engine
+│   │   ├── git_helpers.py       # Git automation helpers
+│   │   └── display.py           # Rich formatting (heatmaps, streak display)
+│   ├── dashboard/               # 🖥️ TUI Dashboard (Textual)
+│   │   ├── app.py               # Main Textual app, keybindings, widget layout
+│   │   ├── styles.tcss          # Textual CSS (borders, layout, grid)
+│   │   └── widgets/
+│   │       ├── profile_widget.py   # Level, rank, XP, streak, pomodoro count, level-up animation
+│   │       ├── quest_widget.py     # Live quest list with complete/fail/delete actions
+│   │       ├── cosmos_widget.py    # Mood score + 7-day sparkline
+│   │       ├── forge_widget.py     # Coding streak + 30-day heatmap
+│   │       └── brain_widget.py     # Brain entry count + latest entry
+│   └── core/                    # Shared utilities
+│       ├── database.py          # SQLite connection, schema init, migrations
+│       ├── config.py            # TOML config management
+│       ├── themes.py            # Theme engine (8 built-in themes)
+│       ├── banner.py            # ASCII art & animations
+│       ├── sound.py             # Terminal bell & platform-native sound effects
+│       └── utils.py             # Shared helpers (rank_title, format_relative…)
+├── tests/                       # Test suite (61 tests)
 │   ├── test_brain.py
 │   ├── test_quest.py
 │   ├── test_cosmos.py
 │   └── test_forge.py
-├── pyproject.toml              # Project metadata & dependencies
-├── README.md
-└── Synthevix_PRD_v1.0.md       # Full Product Requirements Document
+├── docs/
+│   └── plans/                   # Design docs and implementation plans
+├── pyproject.toml               # Project metadata & dependencies
+└── README.md
 ```
 
 ### Non-Functional Requirements
@@ -684,42 +842,6 @@ synthevix-cli/
 
 ---
 
-## Development Roadmap
-
-### ✅ Phase 1 — Core CLI (MVP) · *Current*
-
-| Milestone | Deliverables | Priority |
-|-----------|-------------|----------|
-| **M1: Foundation** | Project setup, DB schema, config system, theme engine | P0 – Critical |
-| **M2: Launch Experience** | ASCII banner, greeting system, quote engine | P0 – Critical |
-| **M3: Brain Module** | All brain commands (add, list, search, tags, export) | P0 – Critical |
-| **M4: Quest Module** | Task CRUD, XP system, leveling, streaks, achievements | P0 – Critical |
-| **M5: Cosmos Module** | Mood logging, history, weather, quotes, greetings | P1 – High |
-| **M6: Forge Module** | Project scaffolding, git helpers, coding streak | P1 – High |
-| **M7: Stats & Overview** | Unified stats command, XP bar, streaks summary | P1 – High |
-| **M8: Polish** | Error handling, edge cases, shell completion, tests | P2 – Medium |
-
-*Estimated total: ~15 days*
-
-### 🔮 Phase 2 — TUI Dashboard *(Future)*
-
-- Full-screen **Textual** dashboard with live-updating widgets
-- Widgets: XP progress, active quests, mood chart, coding streak heatmap, weather, quote of the day
-- Keyboard navigation (Vi-style keybindings) for managing everything from one screen
-- Split-pane layouts with customizable widget arrangement
-
-### 💫 Phase 3 — Advanced Features *(Dream)*
-
-- AI-powered quest suggestions based on behavioral patterns
-- Pomodoro timer integration with XP bonuses
-- Habit tracker with recurring quests
-- Plugin system for community extensions
-- Cross-device sync via encrypted file sync
-- Natural language commands — *"show my notes about Python from last week"*
-- Integration with external tools (GitHub, Jira, Notion) via plugins
-
----
-
 ## Contributing
 
 Synthevix is a personal tool, but if you find it useful and want to contribute fixes or improvements, pull requests are welcome.
@@ -730,6 +852,9 @@ poetry install
 
 # Run tests
 pytest
+
+# Run a specific module's tests
+pytest tests/test_quest.py -v
 
 # Run with live reload during development
 python -m synthevix
@@ -749,6 +874,6 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 *Built with 💜 in the terminal*
 
-**Synthevix v1.0 · Phase 1**
+**Synthevix v1.0 · Stable**
 
 </div>

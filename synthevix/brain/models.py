@@ -67,15 +67,24 @@ def list_entries(
 
 
 def search_entries(query: str, limit: int = 20) -> List[dict]:
-    """Full-text search across title and content."""
+    """Full-text search. Uses FTS5 if available, falls back to LIKE."""
     conn = get_connection()
-    pattern = f"%{query}%"
-    rows = conn.execute("""
-        SELECT * FROM brain_entries
-        WHERE title LIKE ? OR content LIKE ? OR tags LIKE ?
-        ORDER BY created_at DESC
-        LIMIT ?
-    """, (pattern, pattern, pattern, limit)).fetchall()
+    try:
+        rows = conn.execute("""
+            SELECT b.* FROM brain_entries b
+            JOIN brain_fts f ON b.id = f.rowid
+            WHERE brain_fts MATCH ?
+            ORDER BY rank
+            LIMIT ?
+        """, (query, limit)).fetchall()
+    except Exception:
+        # FTS5 unavailable or brain_fts table doesn't exist yet
+        pattern = f"%{query}%"
+        rows = conn.execute("""
+            SELECT * FROM brain_entries
+            WHERE title LIKE ? OR content LIKE ? OR tags LIKE ?
+            ORDER BY created_at DESC LIMIT ?
+        """, (pattern, pattern, pattern, limit)).fetchall()
     conn.close()
     return [dict(r) for r in rows]
 

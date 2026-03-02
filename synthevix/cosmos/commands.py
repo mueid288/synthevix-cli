@@ -104,8 +104,14 @@ def cmd_quote():
 def cmd_weather():
     """Show current weather (requires config setup)."""
     cfg = _cfg()
-    weather = get_weather(cfg.cosmos.weather_location, cfg.cosmos.weather_api_key)
-    print_weather(weather, console, _theme_color())
+    from synthevix.cosmos.weather import get_weather
+    weather = None
+    error = None
+    try:
+        weather = get_weather(cfg.cosmos.weather_location, cfg.cosmos.weather_api_key)
+    except Exception as e:
+        error = e
+    print_weather(weather, console, _theme_color(), error=error)
 
 
 @app.command("greet")
@@ -121,32 +127,14 @@ def cmd_greet():
 @app.command("reflect")
 def cmd_reflect():
     """Start a guided reflection prompt."""
-    color = _theme_color()
-    import random
-    prompts = [
-        "What's one thing that went well today?",
-        "What's one thing you could have done better?",
-        "What are you grateful for right now?",
-        "What's the most important thing on your mind?",
-        "If today had a theme, what would it be?",
-        "What's one thing you want to focus on tomorrow?",
-        "How did your energy levels feel today?",
-        "What's one small win you want to celebrate?",
-    ]
-    prompt_text = random.choice(prompts)
-    console.print(f"\n  [bold {color}]💭 Reflection Prompt[/bold {color}]\n")
-    console.print(f"  [italic]{prompt_text}[/italic]\n")
-    response = Prompt.ask("  Your thoughts (or press Enter to skip)", default="")
-    if response.strip():
-        save = typer.confirm("  Save this as a journal entry?", default=True)
-        if save:
-            from synthevix.brain.models import add_entry
-            add_entry(type="journal", content=f"{prompt_text}\n\n{response}")
-            console.print(f"  [dim {color}]✓ Saved to Brain as a journal entry.[/dim {color}]\n")
+    from synthevix.cosmos.reflect import run_reflect
+    run_reflect(color=_theme_color(), console=console)
 
 
 @app.command("insights")
-def cmd_insights():
+def cmd_insights(
+    full: bool = typer.Option(False, "--full", help="Show raw mood history table (last 7 days)"),
+):
     """View AI-powered mood pattern insights."""
     from synthevix.cosmos.ai import generate_weekly_insight
     color = _theme_color()
@@ -159,3 +147,11 @@ def cmd_insights():
         expand=False
     ))
     console.print()
+
+    if full:
+        from synthevix.cosmos.models import get_mood_history
+        from synthevix.cosmos.display import print_mood_history
+        entries = get_mood_history(days=7)
+        if entries:
+            console.print(f"  [bold {color}]Last 7 Days Mood History[/bold {color}]\n")
+            print_mood_history(entries, console, color)

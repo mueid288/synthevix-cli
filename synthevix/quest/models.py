@@ -244,6 +244,36 @@ def delete_quest(quest_id: int) -> bool:
     return cur.rowcount > 0
 
 
+def log_pomodoro(duration_minutes: int, quest_id: Optional[int] = None) -> None:
+    conn = get_connection()
+    with conn:
+        conn.execute("""
+            INSERT INTO pomodoro_sessions (duration_minutes, quest_id)
+            VALUES (?, ?)
+        """, (duration_minutes, quest_id))
+    conn.close()
+
+
+def get_today_pomodoro_count() -> int:
+    conn = get_connection()
+    row = conn.execute("""
+        SELECT COUNT(*) FROM pomodoro_sessions
+        WHERE date(completed_at, 'localtime') = date('now', 'localtime')
+    """).fetchone()
+    conn.close()
+    return row[0] if row else 0
+
+
+def get_pomodoro_history(limit: int = 10) -> List[dict]:
+    conn = get_connection()
+    rows = conn.execute("""
+        SELECT * FROM pomodoro_sessions
+        ORDER BY completed_at DESC LIMIT ?
+    """, (limit,)).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
 def update_profile(**fields) -> None:
     """Update arbitrary fields on the single user_profile row (id=1).
 

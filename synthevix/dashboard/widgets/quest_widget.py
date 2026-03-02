@@ -22,6 +22,8 @@ class QuestWidget(DataTable):
         self._quests: list[dict] = []
 
     def on_mount(self) -> None:
+        primary = self.app.design.get("primary", "#ffffff")
+        self.border_title = f"[bold {primary}]⚡  Quests[/bold {primary}]"
         self.cursor_type = "row"
         self.add_columns("ID", "Diff", "Quest", "Due")
         self.update_quests()

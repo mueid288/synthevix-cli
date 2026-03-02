@@ -150,10 +150,16 @@ def cmd_delete(
 
 
 @app.command("tags")
-def cmd_tags():
-    """List all tags with entry counts."""
+def cmd_tags(
+    cloud: bool = typer.Option(True, "--cloud/--table", help="Show as a tag cloud instead of a table"),
+):
+    """List all tags with entry counts (shown as a cloud by default)."""
     tags = models.list_tags()
-    print_tags_table(tags, console, _theme_color())
+    if cloud:
+        from synthevix.brain.display import print_tag_cloud
+        print_tag_cloud(tags, console, _theme_color())
+    else:
+        print_tags_table(tags, console, _theme_color())
 
 
 @app.command("export")

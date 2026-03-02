@@ -21,6 +21,8 @@ class BrainWidget(DataTable):
         self._entry_ids: list[int] = []
 
     def on_mount(self) -> None:
+        primary = self.app.design.get("primary", "#ffffff")
+        self.border_title = f"[bold {primary}]🧠  Brain[/bold {primary}]"
         self.cursor_type = "row"
         self.add_columns("ID", "Type", "Title", "Tags")
         self.update_brain()

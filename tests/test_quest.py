@@ -11,8 +11,10 @@ def use_temp_db(tmp_path, monkeypatch):
     monkeypatch.setattr("synthevix.core.database.SYNTHEVIX_DIR", tmp_path)
     monkeypatch.setattr("synthevix.core.database.DB_PATH", tmp_path / "data.db")
     monkeypatch.setattr("synthevix.core.database.BACKUP_DIR", tmp_path / "backups")
-    from synthevix.core.database import init_db
-    init_db()
+    import synthevix.core.database as db
+    with db.get_connection() as conn:
+        conn.execute("DROP TABLE IF EXISTS schema_version")
+    db.init_db()
 
 
 # ── XP Engine Tests ──────────────────────────────────────────────────────────────
@@ -220,7 +222,8 @@ def test_pomodoro_xp_triggers_achievement_check(monkeypatch):
     live_mock.__exit__ = MagicMock(return_value=False)
 
     with patch("time.sleep"), \
-         patch("synthevix.quest.pomodoro.Live", return_value=live_mock):
+         patch("synthevix.quest.pomodoro.Live", return_value=live_mock), \
+         patch("synthevix.quest.pomodoro._kbhit", return_value=False):
         run_pomodoro(minutes=1)
 
     assert len(called_with) > 0, "check_and_unlock was never called after Pomodoro completion"

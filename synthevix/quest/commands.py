@@ -86,8 +86,13 @@ def cmd_complete(
     color = _theme_color()
     print_xp_earned(result["xp_earned"], console, color)
 
+    from synthevix.core.sound import play_sound
+
     if result["leveled_up"]:
+        play_sound("level_up")
         print_level_up(result["old_level"], result["new_level"], console, color)
+    else:
+        play_sound("quest_complete")
 
     if result["new_achievements"]:
         for ach in result["new_achievements"]:
@@ -119,6 +124,10 @@ def cmd_fail(
     except ValueError as e:
         console.print(f"[error]{e}[/error]")
         raise typer.Exit(1)
+        
+    from synthevix.core.sound import play_sound
+    play_sound("quest_fail")
+    
     penalty = result["xp_penalty"]
     console.print(f"\n  [dim]💀 Quest failed. -{penalty} XP penalty applied.[/dim]")
 
@@ -181,6 +190,17 @@ def cmd_history(
     print_quests_table(quests, console, _theme_color())
 
 
+@app.command("calendar")
+def cmd_calendar():
+    """View a 4-week calendar of your completed quests."""
+    from synthevix.quest.display import print_calendar
+    # Get last 35 days to be safe for a full 4-week aligned grid
+    quests = models.get_quest_history(last="35d", limit=1000)
+    # Filter to only completed quests for the heatmap
+    completed = [q for q in quests if q.get("status") == "completed"]
+    print_calendar(completed, console, _theme_color())
+
+
 @app.command("daily")
 def cmd_daily():
     """Generate today's daily challenge quests."""
@@ -198,7 +218,69 @@ def cmd_daily():
 @app.command("focus")
 def cmd_focus(
     minutes: int = typer.Option(25, "--minutes", "-m", help="Duration of focus session in minutes"),
+    history: bool = typer.Option(False, "--history", help="Show last 10 pomodoro sessions"),
 ):
     """Launch a Pomodoro focus timer and earn XP."""
+    if history:
+        from synthevix.quest.models import get_pomodoro_history
+        from synthevix.core.utils import format_relative
+        from rich.table import Table
+        
+        sessions = get_pomodoro_history(limit=10)
+        table = Table(title="Recent Pomodoro Sessions", header_style=f"bold {_theme_color()}", border_style="dim")
+        table.add_column("ID", justify="right")
+        table.add_column("Minutes", justify="right")
+        table.add_column("Completed At")
+        
+        for s in sessions:
+            table.add_row(
+                str(s["id"]), 
+                str(s["duration_minutes"]), 
+                format_relative(s.get("completed_at"))
+            )
+            
+        console.print(table)
+        return
+
     from synthevix.quest.pomodoro import run_pomodoro
     run_pomodoro(minutes=minutes, color=_theme_color(), console=console)
+
+
+PRESET_TEMPLATES = {
+    "workout": [
+        {"title": "100 Pushups", "diff": "hard", "repeat": "daily"},
+        {"title": "5km Run", "diff": "epic", "repeat": "none"},
+        {"title": "Stretching Routine", "diff": "easy", "repeat": "daily"},
+    ],
+    "coding": [
+        {"title": "1 LeetCode Problem", "diff": "medium", "repeat": "daily"},
+        {"title": "Read 1 Tech Article", "diff": "easy", "repeat": "daily"},
+        {"title": "Contribute to Open Source", "diff": "legendary", "repeat": "weekly"},
+    ],
+    "cleaning": [
+        {"title": "Vacuum the house", "diff": "medium", "repeat": "weekly"},
+        {"title": "Take out trash", "diff": "trivial", "repeat": "weekly"},
+        {"title": "Clean desk", "diff": "easy", "repeat": "daily"},
+    ]
+}
+
+@app.command("template")
+def cmd_template(
+    name: str = typer.Argument(..., help="Template name to apply (workout, coding, cleaning)"),
+):
+    """Load a predefined set of quests."""
+    name = name.lower()
+    if name not in PRESET_TEMPLATES:
+        console.print(f"[error]Template '{name}' not found. Available: {', '.join(PRESET_TEMPLATES.keys())}[/error]")
+        raise typer.Exit(1)
+        
+    color = _theme_color()
+    console.print(f"\n[bold {color}]📋 Applying '{name}' template...[/bold {color}]\n")
+    
+    for q in PRESET_TEMPLATES[name]:
+        add_ok = Confirm.ask(f"  Add [{q['diff'].upper()}] {q['title']}?")
+        if add_ok:
+            qid = models.add_quest(q["title"], difficulty=q["diff"], repeat=q["repeat"])
+            console.print(f"    [dim]Quest #{qid} added.[/dim]")
+            
+    console.print(f"\n[bold {color}]✓ Template applied![/bold {color}]\n")

@@ -114,3 +114,46 @@ def print_tags_table(tags: List[dict], console: Console, theme_color: str) -> No
         table.add_row(f"#{tag['tag']}", str(tag["count"]))
 
     console.print(table)
+
+
+def print_tag_cloud(tags: List[dict], console: Console, theme_color: str) -> None:
+    """Display tags as a randomized size cloud based on count."""
+    if not tags:
+        console.print(Panel("[dim]No tags found. Add tags to your entries to build a cloud.[/dim]", border_style=theme_color))
+        return
+        
+    counts = [t['count'] for t in tags]
+    min_c = min(counts)
+    max_c = max(counts)
+    
+    import random
+    random.shuffle(tags) # Shuffle for cloud effect
+    
+    text = Text()
+    text.append("\n")
+    
+    for tag in tags:
+        c = tag['count']
+        
+        # Calculate relative size rating (0.0 to 1.0)
+        weight = 0.5 if max_c == min_c else (c - min_c) / (max_c - min_c)
+        
+        if weight < 0.2:
+            style = "dim"
+        elif weight < 0.5:
+            style = "white"
+        elif weight < 0.8:
+            style = f"bold {theme_color}"
+        else:
+            style = "bold yellow underline"
+            
+        text.append(f"  #{tag['tag']} ", style=style)
+        text.append(f"({c})  ", style="dim")
+        
+    text.append("\n")
+    
+    console.print(Panel(
+        text, 
+        title=f"[bold {theme_color}]☁️  Brain Tag Cloud[/bold {theme_color}]",
+        border_style=theme_color,
+    ))

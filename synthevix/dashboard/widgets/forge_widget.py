@@ -14,6 +14,8 @@ class ForgeStats(Static):
     """Displays developer stats and git activity."""
 
     def on_mount(self) -> None:
+        primary = self.app.design.get("primary", "#ffffff")
+        self.border_title = f"[bold {primary}]🛠️  Forge[/bold {primary}]"
         self.update_forge()
         self.set_interval(60.0, self.update_forge)
 
@@ -32,7 +34,6 @@ class ForgeStats(Static):
         primary = self.app.design.get("primary", "#ffffff")
 
         t = Text()
-        t.append("🛠️  Forge\n\n", style=f"bold {primary}")
 
         t.append("💻  Coding streak: ", style="dim")
         t.append(f"{streak} day{'s' if streak != 1 else ''}\n", style=f"bold {primary}")

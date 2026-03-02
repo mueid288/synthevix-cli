@@ -12,8 +12,10 @@ def use_temp_db(tmp_path, monkeypatch):
     monkeypatch.setattr("synthevix.core.database.SYNTHEVIX_DIR", tmp_path)
     monkeypatch.setattr("synthevix.core.database.DB_PATH", tmp_path / "data.db")
     monkeypatch.setattr("synthevix.core.database.BACKUP_DIR", tmp_path / "backups")
-    from synthevix.core.database import init_db
-    init_db()
+    import synthevix.core.database as db
+    with db.get_connection() as conn:
+        conn.execute("DROP TABLE IF EXISTS schema_version")
+    db.init_db()
 
 
 # ── Mood Tests ──────────────────────────────────────────────────────────────────

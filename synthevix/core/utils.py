@@ -120,3 +120,14 @@ def dict_from_row(row: Any) -> dict:
     if row is None:
         return {}
     return dict(row)
+
+def rank_title(level: int) -> str:
+    """Return the profile rank title for a given level."""
+    if level < 5: return "Recruit"
+    if level < 10: return "Initiate"
+    if level < 15: return "Operative"
+    if level < 20: return "Specialist"
+    if level < 25: return "Commander"
+    if level < 35: return "Warlord"
+    if level < 50: return "Legendary"
+    return "Mythic"

@@ -93,12 +93,15 @@ def print_stats_panel(profile: dict, console: Console, theme_color: str) -> None
     longest = profile.get("longest_streak", 0)
     shields = profile.get("streak_shields", 0)
 
+    from synthevix.core.utils import rank_title
+    rank = rank_title(level)
     bar = xp_bar(xp_into, xp_needed, width=24)
 
     text = Text()
     text.append(f"  Level ", style="dim")
     text.append(f"{level}", style=f"bold {theme_color}")
-    text.append(f"  ·  XP: {total_xp:,}\n", style="dim")
+    text.append(f"  [{rank}]\n", style=theme_color)
+    text.append(f"  XP: {total_xp:,}\n", style="dim")
     text.append(f"  {bar}\n", style=theme_color)
     text.append(f"  {xp_into:,}", style="bold")
     text.append(f" / {xp_needed:,} XP to Level {level + 1}\n\n", style="dim")
@@ -138,12 +141,92 @@ def print_achievements_table(achievements: List[dict], console: Console, theme_c
 
 
 def print_level_up(old_level: int, new_level: int, console: Console, theme_color: str) -> None:
+    from synthevix.core.utils import rank_title
+    old_rank = rank_title(old_level)
+    new_rank = rank_title(new_level)
+    
+    burst_text = (
+        f"[bold {theme_color}]    *    *    🎉 LEVEL UP! 🎉    *    *    [/bold {theme_color}]\n\n"
+        f"[bold white]           Level {old_level}  →  Level {new_level}[/bold white]\n"
+    )
+    
+    if old_rank != new_rank:
+        burst_text += f"[bold yellow]   Rank Achieved: {new_rank.upper()}![/bold yellow]\n"
+        
+    burst_text += f"\n[dim]You're getting stronger, Commander.[/dim]"
+
     console.print(Panel(
-        f"[bold {theme_color}]🎉 LEVEL UP! {old_level} → {new_level}[/bold {theme_color}]\n"
-        f"[dim]You're getting stronger, Commander.[/dim]",
+        burst_text,
         border_style=theme_color,
     ))
 
 
 def print_xp_earned(xp: int, console: Console, theme_color: str) -> None:
     console.print(f"\n  [bold {theme_color}]+{xp} XP[/bold {theme_color}]  [dim]earned![/dim]")
+
+
+def print_calendar(history: List[dict], console: Console, theme_color: str) -> None:
+    """Print a 4-week calendar grid showing habit/quest completion."""
+    import datetime
+    
+    # Bucket history by date string (YYYY-MM-DD)
+    days_data = {}
+    for entry in history:
+        date_str = entry.get("completed_at", "").split()[0]
+        if date_str:
+            days_data[date_str] = days_data.get(date_str, 0) + 1
+            
+    today = datetime.date.today()
+    start_date = today - datetime.timedelta(days=27)  # 4 weeks (28 days)
+    
+    table = Table(title=f"[bold {theme_color}]🗓  4-Week Habit Calendar[/bold {theme_color}]", show_header=False, border_style="dim")
+    
+    # 7 columns for Mon-Sun
+    for _ in range(7):
+        table.add_column(justify="center")
+        
+    # Header row with days of week
+    days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    table.add_row(*[f"[bold]{d}[/bold]" for d in days])
+    
+    current_date = start_date
+    # Align to Monday
+    while current_date.weekday() != 0:
+        current_date -= datetime.timedelta(days=1)
+        
+    row_cells = []
+    
+    while current_date <= today:
+        date_str = current_date.isoformat()
+        count = days_data.get(date_str, 0)
+        
+        if current_date > today or current_date < start_date:
+            cell = "[dim]·[/dim]"
+        elif count == 0:
+            cell = "[dim]░[/dim]"
+        elif count < 3:
+            cell = f"[{theme_color}]▪[/{theme_color}]"
+        elif count < 5:
+            cell = f"[bold {theme_color}]█[/bold {theme_color}]"
+        else:
+            cell = f"[bold yellow]★[/bold yellow]"
+            
+        if current_date == today:
+            cell = f"[u]{cell}[/u]"
+            
+        row_cells.append(cell)
+        
+        if len(row_cells) == 7:
+            table.add_row(*row_cells)
+            row_cells = []
+            
+        current_date += datetime.timedelta(days=1)
+        
+    if row_cells:
+        # Pad the last row
+        while len(row_cells) < 7:
+            row_cells.append("[dim]·[/dim]")
+        table.add_row(*row_cells)
+        
+    console.print(table)
+    console.print(f"\n  [dim]░ None  ▪ 1-2  █ 3-4  [yellow]★[/yellow] 5+[/dim]\n")

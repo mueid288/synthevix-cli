@@ -11,7 +11,7 @@ SYNTHEVIX_DIR = Path.home() / ".synthevix"
 DB_PATH = SYNTHEVIX_DIR / "data.db"
 BACKUP_DIR = SYNTHEVIX_DIR / "backups"
 
-_SCHEMA_VERSION = 2
+_SCHEMA_VERSION = 3
 
 
 def _ensure_dirs() -> None:
@@ -173,7 +173,7 @@ def init_db() -> None:
         """)
         conn.execute("""
             INSERT OR IGNORE INTO schema_version (version) VALUES (?)
-        """, (_SCHEMA_VERSION,))
+        """, (1,))
 
         # Seed achievements
         _seed_achievements(conn)
@@ -250,4 +250,16 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
         except Exception:
             pass  # FTS5 not available — search falls back to LIKE
 
-        conn.execute("UPDATE schema_version SET version = 2")
+        conn.execute("INSERT OR REPLACE INTO schema_version (version) VALUES (2)")
+
+    if version < 3:
+        backup_db()
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS pomodoro_sessions (
+                id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                duration_minutes INTEGER NOT NULL,
+                quest_id         INTEGER REFERENCES quests(id),
+                completed_at     DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.execute("INSERT OR REPLACE INTO schema_version (version) VALUES (3)")

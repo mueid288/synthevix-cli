@@ -207,8 +207,14 @@ def alias_list():
         models.add_alias(new_name.strip(), new_cmd.strip(), new_desc.strip() if new_desc else "")
         console.print(f"\n  [dim]✓ Alias updated.[/dim]")
     elif action == "del":
-        models.delete_alias(selected["alias"])
-        console.print(f"\n  [dim]✓ Alias '{selected['alias']}' deleted.[/dim]")
+        confirmed = questionary.confirm(
+            f"Delete alias '{selected['alias']}'?",
+            default=False,
+            style=_q_style(color),
+        ).ask()
+        if confirmed:
+            models.delete_alias(selected["alias"])
+            console.print(f"\n  [dim]✓ Alias '{selected['alias']}' deleted.[/dim]")
 
 
 @alias_app.command("remove")

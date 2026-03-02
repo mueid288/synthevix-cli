@@ -167,17 +167,29 @@ def config_test_weather():
     from synthevix.cosmos.weather import get_weather
     from synthevix.cosmos.display import print_weather
 
-    weather = get_weather(cfg.cosmos.weather_location, cfg.cosmos.weather_api_key)
+    weather = None
+    error = None
+    try:
+        weather = get_weather(cfg.cosmos.weather_location, cfg.cosmos.weather_api_key)
+    except Exception as e:
+        error = e
 
-    if weather:
+    if weather and not weather.get("cached"):
         console.print(f"  [bold {color}]✓[/bold {color}]  Weather API is working!\n")
         print_weather(weather, console, color)
+    elif weather and weather.get("cached"):
+        console.print(f"  [bold yellow]⚠[/bold yellow]  API failed, using cached weather!\n")
+        print_weather(weather, console, color, error=error)
     else:
-        console.print(Panel(
-            "[red]Failed to fetch weather.[/red]\n\n"
-            "[dim]Check your API key and location string in config.[/dim]",
-            border_style="red",
-        ))
+        msg = f"[red]Failed to fetch weather: {error}[/red]\n\n"
+        if hasattr(error, 'error_type') and error.error_type == 'auth':
+            msg += "[dim]Check your API key in config.[/dim]"
+        elif hasattr(error, 'error_type') and error.error_type == 'location':
+            msg += "[dim]Check your location string in config.[/dim]"
+        else:
+            msg += "[dim]Check your network or config.[/dim]"
+        
+        console.print(Panel(msg, border_style="red"))
         raise typer.Exit(1)
 
 

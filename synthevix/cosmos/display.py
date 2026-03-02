@@ -56,11 +56,20 @@ def _print_mood_bars(entries: List[dict], console: Console, theme_color: str) ->
     console.print(f"\n  [dim]Mood trend (oldest → newest):[/dim]\n  {bars}\n")
 
 
-def print_weather(weather: Optional[dict], console: Console, theme_color: str) -> None:
+def print_weather(weather: Optional[dict], console: Console, theme_color: str, error: Optional[Exception] = None) -> None:
     if not weather:
+        if error:
+            msg = f"[red]Weather failed: {error}[/red]"
+            if hasattr(error, 'error_type') and error.error_type == 'auth':
+                msg += "\n[dim]Verify your openweathermap API key in config.[/dim]"
+            elif hasattr(error, 'error_type') and error.error_type == 'location':
+                msg += "\n[dim]Verify your weather_location string in config.[/dim]"
+        else:
+            msg = "[dim]Weather not configured.\nAdd weather_location and weather_api_key to ~/.synthevix/config.toml[/dim]"
+            
         console.print(
             Panel(
-                "[dim]Weather not configured.\nAdd weather_location and weather_api_key to ~/.synthevix/config.toml[/dim]",
+                msg,
                 border_style=theme_color,
                 title=f"[bold {theme_color}]🌤  Weather[/bold {theme_color}]",
             )
@@ -72,6 +81,11 @@ def print_weather(weather: Optional[dict], console: Console, theme_color: str) -
     text.append(f"  {weather['temp_c']}°C", style="bold")
     text.append(f"  (feels like {weather['feels_like_c']}°C)\n", style="dim")
     text.append(f"  {weather['description']}  ·  Humidity: {weather['humidity']}%\n", style="dim")
+    
+    if weather.get("cached"):
+        from synthevix.core.utils import format_relative
+        rel = format_relative(weather.get("timestamp"))
+        text.append(f"  [dim]last updated {rel}[/dim]\n")
 
     console.print(Panel(text, border_style=theme_color,
                   title=f"[bold {theme_color}]🌤  Weather[/bold {theme_color}]"))

@@ -5,7 +5,7 @@ from textual.containers import Vertical
 from textual.widgets import Static
 from rich.text import Text
 
-from synthevix.quest.models import get_profile
+from synthevix.quest.models import get_profile, get_today_pomodoro_count
 from synthevix.quest.xp import level_from_xp
 from synthevix.core.utils import xp_bar
 
@@ -22,12 +22,67 @@ class ProfileWidget(Static):
     """
 
     def on_mount(self) -> None:
+        primary = self.app.design.get("primary", "#ffffff")
+        self.border_title = f"[bold {primary}]⚔  Profile[/bold {primary}]"
         self.update_profile()
-        # Set a timer to refresh the data every 10 seconds
         self.set_interval(10.0, self.update_profile)
+        
+        self.animating_level_up = False
+        self.animation_step = 0
+        self.animation_timer = None
+        self.old_level_anim = 0
+        self.new_level_anim = 0
+
+    def trigger_level_up_animation(self) -> None:
+        """Trigger a flashing level-up animation."""
+        if self.animating_level_up:
+            return
+            
+        profile = get_profile()
+        self.new_level_anim = profile.get("level", 1)
+        self.old_level_anim = self.new_level_anim - 1 # approximate if we skip levels, it's just visual
+        
+        self.animating_level_up = True
+        self.animation_step = 0
+        
+        if self.animation_timer:
+            self.animation_timer.stop()
+            
+        self.animation_timer = self.set_interval(0.25, self._animate_step)
+        self._animate_step()
+
+    def _animate_step(self) -> None:
+        if self.animation_step >= 6: # 3 flashes (on/off) = 6 steps
+            self.animating_level_up = False
+            if self.animation_timer:
+                self.animation_timer.stop()
+            self.styles.border = ("round", self.app.design.get("primary", "#ffffff"))
+            self.update_profile()
+            return
+            
+        is_flash = self.animation_step % 2 == 0
+        color = "#ffffff" if is_flash else self.app.design.get("primary", "#ffffff")
+        
+        # Flash the border
+        self.styles.border = ("heavy", color)
+        
+        # Flash the content
+        from synthevix.core.utils import rank_title
+        rank = rank_title(self.new_level_anim)
+        
+        t = Text()
+        t.append(f"⚡ LEVEL UP!\n", style=f"bold {color}")
+        t.append(f"Lv {self.old_level_anim} → {self.new_level_anim}\n", style=f"bold {color}")
+        t.append(f"[{rank}]\n", style=f"bold {color}")
+        self.update(t)
+        
+        self.animation_step += 1
 
     def update_profile(self) -> None:
         """Fetch profile data and render the widget."""
+        if hasattr(self, 'animating_level_up') and self.animating_level_up:
+            return
+            
         try:
             profile = get_profile()
         except Exception:
@@ -42,10 +97,13 @@ class ProfileWidget(Static):
         # Get the theme's primary color from the app's stylesheet variables
         primary = self.app.design.get("primary", "#ffffff")
         
+        from synthevix.core.utils import rank_title
+        rank = rank_title(level)
         bar = xp_bar(xp_into, xp_required, width=22)
 
         t = Text()
         t.append(f"⚔  Level {level}\n", style=f"bold {primary}")
+        t.append(f"   [{rank}]\n", style=primary)
         t.append(f"{bar}\n", style=f"{primary}")
         t.append(f"{xp_into:,} / {xp_required:,} XP\n\n", style="dim")
         
@@ -59,7 +117,11 @@ class ProfileWidget(Static):
         t.append(f"{shields}\n", style="bold")
         
         t.append("\n🍅 Today's Pomodoros: ", style="dim")
-        # Currently stateless in DB, defaulting to 0 for TUI layout purposes
-        t.append("0\n", style=f"bold {primary}")
+        try:
+            pomo_count = get_today_pomodoro_count()
+        except Exception:
+            pomo_count = 0
+            
+        t.append(f"{pomo_count}\n", style=f"bold {primary}")
 
         self.update(t)

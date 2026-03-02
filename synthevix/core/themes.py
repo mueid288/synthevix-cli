@@ -85,6 +85,30 @@ _BUILTIN_THEMES: Dict[str, Dict[str, str]] = {
         "muted":     "#93A1A1",
         "banner":    "#268BD2",
     },
+    "tokyo-night": {
+        "name":      "Tokyo Night",
+        "primary":   "#7AA2F7",
+        "secondary": "#9ECE6A",
+        "accent":    "#F7768E",
+        "success":   "#9ECE6A",
+        "warning":   "#E0AF68",
+        "error":     "#F7768E",
+        "text":      "#C0CAF5",
+        "muted":     "#565F89",
+        "banner":    "#BB9AF7",
+    },
+    "catppuccin": {
+        "name":      "Catppuccin Mocha",
+        "primary":   "#B4BEFE",
+        "secondary": "#89DCEB",
+        "accent":    "#FAB387",
+        "success":   "#A6E3A1",
+        "warning":   "#F9E2AF",
+        "error":     "#F38BA8",
+        "text":      "#CDD6F4",
+        "muted":     "#6C7086",
+        "banner":    "#CBA6F7",
+    },
 }
 
 

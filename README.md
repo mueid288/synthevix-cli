@@ -76,8 +76,11 @@ It combines four powerful modules into a single, beautifully designed terminal e
 
 - ✨ **Animated ASCII banner** on launch with theme-matched colors
 - 🕰️ **Time-aware personalized greetings** (morning / afternoon / evening / night)
+- 🖥️ **Interactive TUI Dashboard** featuring a 30-day GitHub-style coding heatmap and 7-day mood sparklines
+- 🔔 **Global Audio Chimes** for Pomodoro completions and leveling up
 - 📝 **Brain** — capture notes, journal entries, code snippets, and bookmarks with full-text search
 - ⚔️ **Quest** — RPG-style task management with XP, leveling, streaks, achievements, and daily challenges
+- 🚨 **Focus Mode** — Pomodoro focus timers directly integrated into the XP engine
 - 💜 **Cosmos** — mood & energy logging, reflection prompts, weather, and motivational quotes
 - ⚒️ **Forge** — project scaffolding from templates, git quick-commands, coding streak heatmap, and alias management
 - 🎨 **6 built-in color themes** (Cyberpunk, Dracula, Nord, Synthwave, Monokai, Solarized) + custom themes
@@ -207,7 +210,7 @@ Running `synthevix` with no subcommand displays the full launch screen:
 
 ### 🧠 Brain — Knowledge Management
 
-Brain is your personal second brain in the terminal. Capture, organize, and resurface notes, journal entries, code snippets, and bookmarks without ever leaving the command line.
+Brain is your personal second brain in the terminal. Capture, organize, and resurface notes, journal entries, code snippets, and bookmarks without ever leaving the command line. Backed by ultra-fast **FTS5 SQLite** search, finding old notes is instant.
 
 #### Commands
 
@@ -242,10 +245,13 @@ Quest transforms your to-do list into an RPG-style progression system. Every tas
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `quest add <title>` | Add a new quest with optional difficulty | `synthevix quest add "Fix auth bug" --diff hard` |
+| `quest add <title>` | Add a new quest with optional difficulty/recurrence | `synthevix quest add "Fix auth bug" --diff hard --repeat daily` |
 | `quest list` | List active quests by status/priority | `synthevix quest list --status active` |
 | `quest complete <id>` | Mark a quest as done and earn XP | `synthevix quest complete 7` |
 | `quest fail <id>` | Mark a quest as failed (XP penalty) | `synthevix quest fail 7` |
+| `quest delete <id>` | Delete a quest entirely | `synthevix quest delete 7` |
+| `quest reset <id>` | Reset a completed recurring quest | `synthevix quest reset 7` |
+| `quest pomodoro` | Start an immersive focus timer | `synthevix quest pomodoro 25` |
 | `quest stats` | View XP, level, streak, and achievements | `synthevix quest stats` |
 | `quest achievements` | View all achievements and progress | `synthevix quest achievements` |
 | `quest history` | View completed/failed quest log | `synthevix quest history --last 30d` |
@@ -313,7 +319,8 @@ Cosmos turns your terminal into a mindful companion. Track your mood and energy 
 | `cosmos weather` | Show current weather | `synthevix cosmos weather` |
 | `cosmos greet` | Get a personalized greeting | `synthevix cosmos greet` |
 | `cosmos reflect` | Prompt a guided reflection | `synthevix cosmos reflect` |
-| `cosmos insights` | View mood pattern insights | `synthevix cosmos insights` |
+| `cosmos insights` | View 4-week mood pattern insights | `synthevix cosmos insights` |
+| `config test-weather` | Verify your Weather API key | `synthevix config test-weather` |
 
 #### Mood Scale
 

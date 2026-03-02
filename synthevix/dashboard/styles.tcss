@@ -21,9 +21,14 @@ BaseWidget {
     color: $text;
 }
 
+QuestWidget {
+    border: double $primary;
+}
+
 #profile-widget {
     row-span: 1;
     column-span: 1;
+    border: heavy $primary;
 }
 
 #cosmos-widget {

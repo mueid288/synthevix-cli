@@ -62,7 +62,11 @@ class SynthevixDashboard(App):
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
-        yield Header(show_clock=True)
+        cfg = load_config()
+        theme_name = cfg.theme.active.title()
+        username = cfg.general.username
+        
+        yield Header(show_clock=True, name=f"{username} · {theme_name}")
         with Grid(id="main-grid"):
             yield ProfileWidget(id="profile-widget")
             yield CosmosWidget(id="cosmos-widget")
@@ -83,9 +87,20 @@ class SynthevixDashboard(App):
             from synthevix.quest import models
             try:
                 if action == "complete":
-                    earned_xp = models.complete_quest(message.quest_id)
-                    self.notify(f"Quest Complete! +{earned_xp} XP", title="Victory", timeout=3)
+                    result = models.complete_quest(message.quest_id)
+                    from synthevix.core.sound import play_sound
+                    
+                    if result.get("leveled_up"):
+                        play_sound("level_up")
+                        self.notify(f"LEVEL UP! {result['old_level']} → {result['new_level']}", title="Level Up!", timeout=5)
+                        self.query_one(ProfileWidget).trigger_level_up_animation()
+                    else:
+                        play_sound("quest_complete")
+                        self.notify(f"Quest Complete! +{result['xp_earned']} XP", title="Victory", timeout=3)
+                        
                 elif action == "fail":
+                    from synthevix.core.sound import play_sound
+                    play_sound("quest_fail")
                     models.fail_quest(message.quest_id)
                     self.notify(f"Quest Failed. XP deducted.", title="Defeat", severity="warning", timeout=3)
                 elif action == "delete":
@@ -108,8 +123,8 @@ class SynthevixDashboard(App):
         # Suspend Textual so the normal Rich pager can take over the terminal
         with self.suspend():
             try:
-                import os
-                os.system('clear')
+                from rich.console import Console as _Console
+                _Console().clear()
                 cmd_view(message.entry_id)
 
                 print()

@@ -17,6 +17,8 @@ class CosmosWidget(Static):
 
     def on_mount(self) -> None:
         cfg = load_config()
+        primary = self.app.design.get("primary", "#ffffff")
+        self.border_title = f"[bold {primary}]🌌  Cosmos[/bold {primary}]"
         # Cache quote so it doesn't flicker on every refresh
         self.quote_cache = random_quote(categories=cfg.cosmos.quote_categories)
         self.update_cosmos()
@@ -40,7 +42,6 @@ class CosmosWidget(Static):
         MOOD_COLORS = {1: "red", 2: "orange3", 3: "yellow", 4: "green3", 5: "green", 6: "cyan"}
 
         t = Text()
-        t.append("🌌  Cosmos\n\n", style=f"bold {primary}")
 
         t.append("Today's Vibe:\n", style="dim")
         if today_mood:

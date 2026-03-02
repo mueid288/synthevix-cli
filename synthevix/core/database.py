@@ -81,6 +81,7 @@ def init_db() -> None:
                 status       TEXT    DEFAULT 'active'
                              CHECK(status IN ('active','completed','failed','archived')),
                 xp_earned    INTEGER DEFAULT 0,
+                repeat       TEXT    DEFAULT 'none',
                 due_date     DATETIME,
                 completed_at DATETIME,
                 created_at   DATETIME DEFAULT CURRENT_TIMESTAMP

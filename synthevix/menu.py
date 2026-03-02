@@ -109,6 +109,8 @@ MODULES = [
         ("👁  Preview theme",        ["config", "theme", "preview"]),
         ("✏   Edit config file",     ["config", "edit"]),
         ("🔄  Reset to defaults",    ["config", "reset"]),
+        ("🌤  Test weather config",    ["config", "test-weather"]),
+        ("⌨   Shell completion",       ["config", "shell-completion"]),
     ]),
 ]
 

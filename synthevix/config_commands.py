@@ -142,3 +142,60 @@ def config_reset():
     if ok:
         reset_config()
         console.print("  [dim]Config reset to defaults.[/dim]")
+
+
+@app.command("test-weather")
+def config_test_weather():
+    """Test the weather API key and location from your config."""
+    cfg = load_config()
+    color = _theme_color()
+
+    if not cfg.cosmos.weather_api_key:
+        console.print(Panel(
+            "[yellow]No weather_api_key configured.[/yellow]\n\n"
+            "Add to [cyan]~/.synthevix/config.toml[/cyan]:\n\n"
+            "  [dim][cosmos]\n  weather_api_key = \"YOUR_OPENWEATHERMAP_KEY\"\n"
+            "  weather_location = \"London,UK\"[/dim]\n\n"
+            "Get a free key at [cyan]https://openweathermap.org/api[/cyan]",
+            title=f"[bold {color}]⚙  Weather Config[/bold {color}]",
+            border_style=color,
+        ))
+        raise typer.Exit(1)
+
+    console.print(f"\n  [dim]Testing weather for: {cfg.cosmos.weather_location}...[/dim]\n")
+
+    from synthevix.cosmos.weather import get_weather
+    from synthevix.cosmos.display import print_weather
+
+    weather = get_weather(cfg.cosmos.weather_location, cfg.cosmos.weather_api_key)
+
+    if weather:
+        console.print(f"  [bold {color}]✓[/bold {color}]  Weather API is working!\n")
+        print_weather(weather, console, color)
+    else:
+        console.print(Panel(
+            "[red]Failed to fetch weather.[/red]\n\n"
+            "[dim]Check your API key and location string in config.[/dim]",
+            border_style="red",
+        ))
+        raise typer.Exit(1)
+
+
+@app.command("shell-completion")
+def config_shell_completion():
+    """Show instructions for installing tab completion."""
+    color = _theme_color()
+    console.print(Panel(
+        "[bold]Install Tab Completion[/bold]\n\n"
+        "[dim]Step 1 — Run:[/dim]\n"
+        "  [cyan]synthevix --install-completion[/cyan]\n\n"
+        "[dim]Step 2 — The command prints a line to add to your shell config:[/dim]\n"
+        "  Bash:  [cyan]~/.bashrc[/cyan]\n"
+        "  Zsh:   [cyan]~/.zshrc[/cyan]\n"
+        "  Fish:  [cyan]~/.config/fish/config.fish[/cyan]\n\n"
+        "[dim]Step 3 — Reload your shell:[/dim]\n"
+        "  [cyan]source ~/.zshrc[/cyan]  (or restart your terminal)\n\n"
+        "[dim]After setup, pressing [Tab] after `synthevix ` shows all commands.[/dim]",
+        title=f"[bold {color}]⌨  Shell Completion[/bold {color}]",
+        border_style=color,
+    ))

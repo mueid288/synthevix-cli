@@ -21,22 +21,43 @@ class ForgeStats(Static):
         try:
             streak = get_current_coding_streak()
             today_day = get_coding_day(datetime.date.today())
-            commits = today_day.get("commits", 0) if today_day else 0
+            commits_today = today_day.get("commits", 0) if today_day else 0
+            from synthevix.forge.models import get_streak_data
+            streak_data = get_streak_data(days=30)
         except Exception:
             streak = 0
-            commits = 0
+            commits_today = 0
+            streak_data = []
 
         primary = self.app.design.get("primary", "#ffffff")
-        accent = self.app.design.get("secondary", "#aaaaaa")
 
         t = Text()
         t.append("🛠️  Forge\n\n", style=f"bold {primary}")
-        
-        t.append("💻  Active coding streak: ", style="dim")
-        t.append(f"{streak} day{'s' if streak != 1 else ''}\n", style=f"bold {accent}")
-        
-        t.append("📈  Commits today: ", style="dim")
-        t.append(f"{commits}\n", style="bold")
+
+        t.append("💻  Coding streak: ", style="dim")
+        t.append(f"{streak} day{'s' if streak != 1 else ''}\n", style=f"bold {primary}")
+
+        t.append("📈  Today's commits: ", style="dim")
+        t.append(f"{commits_today}\n\n", style="bold")
+
+        # 30-day mini heatmap
+        if streak_data:
+            import datetime as dt
+            commit_map = {r["date"]: r.get("commits", 0) for r in streak_data}
+            today = dt.date.today()
+            t.append("Activity (30d): ", style="dim")
+            for i in range(29, -1, -1):
+                d = (today - dt.timedelta(days=i)).isoformat()
+                c = commit_map.get(d, 0)
+                if c == 0:
+                    t.append("░", style="dim")
+                elif c < 3:
+                    t.append("▪", style="green3")
+                elif c < 6:
+                    t.append("▪", style=primary)
+                else:
+                    t.append("█", style=f"bold {primary}")
+            t.append("\n")
 
         self.update(t)
 

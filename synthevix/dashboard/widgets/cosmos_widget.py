@@ -28,13 +28,20 @@ class CosmosWidget(Static):
         except Exception:
             today_mood = None
 
+        try:
+            from synthevix.cosmos.models import get_mood_history
+            history = get_mood_history(days=7)
+        except Exception:
+            history = []
+
         primary = self.app.design.get("primary", "#ffffff")
         accent = self.app.design.get("secondary", "#aaaaaa")
+
+        MOOD_COLORS = {1: "red", 2: "orange3", 3: "yellow", 4: "green3", 5: "green", 6: "cyan"}
 
         t = Text()
         t.append("🌌  Cosmos\n\n", style=f"bold {primary}")
 
-        # Mood & Energy
         t.append("Today's Vibe:\n", style="dim")
         if today_mood:
             m = today_mood.get("mood", 3)
@@ -45,6 +52,14 @@ class CosmosWidget(Static):
             t.append(f"  ⚡  Energy: {e}/10\n", style="bold yellow")
         else:
             t.append("  [not logged yet]\n", style="italic dim")
+
+        # 7-day sparkline (oldest → newest)
+        if history:
+            t.append("\n7-day trend: ", style="dim")
+            for entry in reversed(history[-7:]):
+                v = entry.get("mood", 3)
+                t.append("█", style=MOOD_COLORS.get(v, "white"))
+            t.append("\n")
 
         t.append("\nQuote of the Day:\n", style="dim")
         if self.quote_cache:

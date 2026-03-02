@@ -165,7 +165,7 @@ def alias_list():
     console.print()
 
     choices = [questionary.Choice(title=a["alias"], value=a) for a in aliases]
-    choices.append(questionary.Choice(title="←  Back", value=None))
+    choices.append(questionary.Choice(title="←  Back", value="back"))
 
     from synthevix.menu import _q_style
     
@@ -176,7 +176,7 @@ def alias_list():
         use_arrow_keys=True
     ).ask()
 
-    if not selected:
+    if not selected or selected == "back":
         return
 
     action = questionary.select(

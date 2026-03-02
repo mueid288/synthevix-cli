@@ -235,6 +235,25 @@ def run_menu(console: Console, initial_hex_color: str, username: str = "Commande
         console.print(Align.center(f"{emoji}  [bold {hex_color}]{greeting}[/bold {hex_color}]"))
         console.print(Align.center(f"[dim italic]✨  {format_quote(quote)}[/dim italic]\n"))
 
+        # Brain resurface — show a random past entry
+        try:
+            from synthevix.brain.models import random_entry
+            entry = random_entry()
+            if entry:
+                title = entry.get("title") or entry["type"].capitalize()
+                raw_content = (entry.get("content") or "").replace("\n", " ")
+                snippet = raw_content[:80] + ("…" if len(raw_content) > 80 else "")
+                from rich.panel import Panel
+                console.print(Align.center(Panel(
+                    f"[bold]{title}[/bold]\n[dim]{snippet}[/dim]",
+                    title="[dim]🧠 Brain Resurface[/dim]",
+                    border_style="dim",
+                    expand=False,
+                )))
+                console.print()
+        except Exception:
+            pass
+
         _print_quick_stats(cfg, theme_data, hex_color)
 
         # Overdue banner

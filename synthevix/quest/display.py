@@ -4,15 +4,13 @@ from __future__ import annotations
 
 from typing import List
 
-from rich.columns import Columns
 from rich.console import Console
 from rich.panel import Panel
-from rich.progress import BarColumn, Progress, TextColumn
 from rich.table import Table
 from rich.text import Text
 
-from synthevix.core.utils import format_date, format_relative, xp_bar
-from synthevix.quest.xp import level_from_xp, xp_for_level
+from synthevix.core.utils import format_date, format_relative, truncate_text, xp_bar
+from synthevix.quest.xp import level_from_xp
 
 DIFFICULTY_COLORS = {
     "trivial":   "dim white",
@@ -42,20 +40,21 @@ def print_quests_table(quests: List[dict], console: Console, theme_color: str) -
         border_style="dim",
         expand=False,
     )
-    table.add_column("ID", width=5, justify="right", style="bold")
-    table.add_column("Status", width=6)
-    table.add_column("Quest", width=40)
-    table.add_column("Difficulty", width=12)
+    table.add_column("ID", width=4, justify="right", style="bold")
+    table.add_column("Status", width=10, justify="left")
+    table.add_column("Quest", width=40, justify="left")
+    table.add_column("Diff", width=10, justify="left")
     table.add_column("XP", width=6, justify="right")
-    table.add_column("Created", width=12)
-    table.add_column("Due", width=12)
+    table.add_column("Created", width=16, justify="left")
+    table.add_column("Due", width=14, justify="left")
 
     for q in quests:
         status = q.get("status", "active")
         diff = q.get("difficulty", "medium")
         icon = STATUS_ICONS.get(status, "•")
+        status_label = f"{icon}  {status}"
         diff_color = DIFFICULTY_COLORS.get(diff, "white")
-        diff_label = f"[{diff_color}]{diff}[/{diff_color}]"
+        diff_label = f"[{diff_color}]{diff[:10]}[/{diff_color}]"
         xp = str(q.get("xp_earned", 0)) if q.get("xp_earned") else "—"
 
         import datetime
@@ -75,8 +74,8 @@ def print_quests_table(quests: List[dict], console: Console, theme_color: str) -
 
         table.add_row(
             str(q["id"]),
-            icon,
-            Text(q["title"], overflow="ellipsis"),
+            status_label,
+            Text(truncate_text(q["title"], 40), overflow="ellipsis"),
             diff_label,
             xp,
             format_relative(q.get("created_at")),
@@ -98,21 +97,19 @@ def print_stats_panel(profile: dict, console: Console, theme_color: str) -> None
     rank = rank_title(level)
     bar = xp_bar(xp_into, xp_needed, width=24)
 
-    text = Text()
-    text.append(f"  Level ", style="dim")
-    text.append(f"{level}", style=f"bold {theme_color}")
-    text.append(f"  [{rank}]\n", style=theme_color)
-    text.append(f"  XP: {total_xp:,}\n", style="dim")
-    text.append(f"  {bar}\n", style=theme_color)
-    text.append(f"  {xp_into:,}", style="bold")
-    text.append(f" / {xp_needed:,} XP to Level {level + 1}\n\n", style="dim")
-    text.append(f"  🔥 Current streak: ", style="dim")
-    text.append(f"{streak} day{'s' if streak != 1 else ''}\n", style="bold yellow")
-    text.append(f"  🏅 Longest streak: {longest} days\n", style="dim")
-    text.append(f"  🛡️  Streak shields: {shields}\n", style="dim")
+    stats = Table.grid(padding=(0, 1))
+    stats.add_column(style="dim", width=18, justify="right")
+    stats.add_column(justify="left")
+    stats.add_row("Level", f"[bold {theme_color}]{level}[/bold {theme_color}] [{rank}]")
+    stats.add_row("Total XP", f"{total_xp:,}")
+    stats.add_row("Progress", f"[{theme_color}]{bar}[/{theme_color}]")
+    stats.add_row("Next Level", f"{xp_into:,} / {xp_needed:,} XP to Level {level + 1}")
+    stats.add_row("🔥  Current streak", f"[bold yellow]{streak} day{'s' if streak != 1 else ''}[/bold yellow]")
+    stats.add_row("🏅  Longest streak", f"{longest} day{'s' if longest != 1 else ''}")
+    stats.add_row("🛡️  Streak shields", str(shields))
 
     console.print(Panel(
-        text,
+        stats,
         title=f"[bold {theme_color}]⚔  Quest Stats[/bold {theme_color}]",
         border_style=theme_color,
     ))

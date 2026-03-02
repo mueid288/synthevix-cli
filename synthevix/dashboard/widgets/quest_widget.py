@@ -25,7 +25,10 @@ class QuestWidget(DataTable):
         primary = self.app.design.get("primary", "#ffffff")
         self.border_title = f"[bold {primary}]⚡  Quests[/bold {primary}]"
         self.cursor_type = "row"
-        self.add_columns("ID", "Diff", "Quest", "Due")
+        self.add_column("ID", width=4)
+        self.add_column("Diff", width=6)
+        self.add_column("Quest", width=32)
+        self.add_column("Due", width=12)
         self.update_quests()
         self.set_interval(15.0, self.update_quests)
 
@@ -83,6 +86,6 @@ class QuestWidget(DataTable):
             self.add_row(
                 Text(str(q["id"]), style="dim"),
                 Text(q["difficulty"][:3].upper(), style=diff_style),
-                Text(q["title"], style=f"bold {primary}"),
+                Text((q["title"][:29] + "...") if len(q["title"]) > 32 else q["title"], style=f"bold {primary}"),
                 Text.from_markup(due_str),
             )

@@ -9,7 +9,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from synthevix.core.utils import format_date
+from synthevix.core.utils import format_date, truncate_text
 from synthevix.cosmos.models import MOOD_EMOJIS, MOOD_LABELS
 
 MOOD_COLORS = {1: "red", 2: "orange3", 3: "yellow", 4: "green3", 5: "green", 6: "cyan"}
@@ -21,10 +21,10 @@ def print_mood_history(entries: List[dict], console: Console, theme_color: str) 
         return
 
     table = Table(header_style=f"bold {theme_color}", border_style="dim")
-    table.add_column("Date", width=18)
-    table.add_column("Mood", width=14)
-    table.add_column("Energy", width=10, justify="center")
-    table.add_column("Note", width=35)
+    table.add_column("Date", width=16, justify="left")
+    table.add_column("Mood", width=16, justify="left")
+    table.add_column("Energy", width=8, justify="center")
+    table.add_column("Note", width=40, justify="left")
 
     for e in entries:
         mood_val = e.get("mood", 3)
@@ -32,11 +32,11 @@ def print_mood_history(entries: List[dict], console: Console, theme_color: str) 
         emoji = MOOD_EMOJIS.get(mood_val, "😐")
         label = MOOD_LABELS.get(mood_val, "Meh")
         energy = str(e["energy"]) + "/10" if e.get("energy") else "—"
-        note = (e.get("note") or "")[: 35] or "[dim]—[/dim]"
+        note = truncate_text((e.get("note") or "").strip(), 40) or "—"
 
         table.add_row(
             format_date(e.get("logged_at"), "%b %d, %H:%M"),
-            f"[{color}]{emoji} {label}[/{color}]",
+            f"[{color}]{emoji}  {label}[/{color}]",
             energy,
             note,
         )
@@ -77,18 +77,20 @@ def print_weather(weather: Optional[dict], console: Console, theme_color: str, e
         )
         return
 
-    text = Text()
-    text.append(f"  {weather['icon']}  {weather['city']}\n", style=f"bold {theme_color}")
-    text.append(f"  {weather['temp_c']}°C", style="bold")
-    text.append(f"  (feels like {weather['feels_like_c']}°C)\n", style="dim")
-    text.append(f"  {weather['description']}  ·  Humidity: {weather['humidity']}%\n", style="dim")
+    details = Table.grid(padding=(0, 1))
+    details.add_column(style="dim", width=12, justify="right")
+    details.add_column(justify="left")
+    details.add_row("Location", f"{weather['icon']}  [bold {theme_color}]{weather['city']}[/bold {theme_color}]")
+    details.add_row("Temp", f"[bold]{weather['temp_c']}°C[/bold] (feels like {weather['feels_like_c']}°C)")
+    details.add_row("Conditions", f"{weather['description']}")
+    details.add_row("Humidity", f"{weather['humidity']}%")
     
     if weather.get("cached"):
         from synthevix.core.utils import format_relative
         rel = format_relative(weather.get("timestamp"))
-        text.append(f"  [dim]last updated {rel}[/dim]\n")
+        details.add_row("Cache", f"[dim]last updated {rel}[/dim]")
 
-    console.print(Panel(text, border_style=theme_color,
+    console.print(Panel(details, border_style=theme_color,
                   title=f"[bold {theme_color}]🌤  Weather[/bold {theme_color}]"))
 
 

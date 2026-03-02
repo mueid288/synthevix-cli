@@ -24,7 +24,10 @@ class BrainWidget(DataTable):
         primary = self.app.design.get("primary", "#ffffff")
         self.border_title = f"[bold {primary}]🧠  Brain[/bold {primary}]"
         self.cursor_type = "row"
-        self.add_columns("ID", "Type", "Title", "Tags")
+        self.add_column("ID", width=4)
+        self.add_column("Type", width=8)
+        self.add_column("Title", width=26)
+        self.add_column("Tags", width=22)
         self.update_brain()
         self.set_interval(20.0, self.update_brain)
 
@@ -61,8 +64,8 @@ class BrainWidget(DataTable):
             t_style = type_colors.get(e["type"], "white")
             title = e["title"] or "Untitled"
 
-            if len(title) > 30:
-                title = title[:27] + "..."
+            if len(title) > 26:
+                title = title[:23] + "..."
 
             try:
                 tags = json.loads(e.get("tags", "[]"))
@@ -71,8 +74,10 @@ class BrainWidget(DataTable):
                 
             tags_text = Text()
             for t in tags:
-                tags_text.append(f" {t} ", style=f"black on {primary}")
-                tags_text.append(" ")
+                tags_text.append(f"#{t} ", style=f"bold {primary}")
+
+            if not tags:
+                tags_text.append("—", style="dim")
 
             self._entry_ids.append(e["id"])
             self.add_row(

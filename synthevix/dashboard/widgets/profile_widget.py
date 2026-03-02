@@ -1,13 +1,13 @@
 """Profile widget displaying level, XP, and streaks."""
 
-from textual.app import ComposeResult
-from textual.containers import Vertical
 from textual.widgets import Static
 from rich.text import Text
 
 from synthevix.quest.models import get_profile, get_today_pomodoro_count
 from synthevix.quest.xp import level_from_xp
 from synthevix.core.utils import xp_bar
+
+LABEL_WIDTH = 20
 
 
 class ProfileWidget(Static):
@@ -102,26 +102,22 @@ class ProfileWidget(Static):
         bar = xp_bar(xp_into, xp_required, width=22)
 
         t = Text()
-        t.append(f"⚔  Level {level}\n", style=f"bold {primary}")
-        t.append(f"   [{rank}]\n", style=primary)
-        t.append(f"{bar}\n", style=f"{primary}")
-        t.append(f"{xp_into:,} / {xp_required:,} XP\n\n", style="dim")
-        
-        t.append("🔥 Current streak: ", style="dim")
-        t.append(f"{streak} day{'s' if streak != 1 else ''}\n", style="bold yellow")
-        
-        t.append("🏅 Longest streak: ", style="dim")
-        t.append(f"{longest} day{'s' if longest != 1 else ''}\n", style="bold")
-        
-        t.append("🛡️  Streak shields: ", style="dim")
-        t.append(f"{shields}\n", style="bold")
-        
-        t.append("\n🍅 Today's Pomodoros: ", style="dim")
+        t.append(f"⚔  Level {level}  [{rank}]\n", style=f"bold {primary}")
+        t.append(f"{bar}\n", style=primary)
+        t.append(f"{xp_into:,} / {xp_required:,} XP to next level\n\n", style="dim")
+
+        def add_stat(label: str, value: str, value_style: str = "bold") -> None:
+            t.append(f"{label:<{LABEL_WIDTH}}", style="dim")
+            t.append(f"{value}\n", style=value_style)
+
+        add_stat("🔥  Current streak", f"{streak} day{'s' if streak != 1 else ''}", "bold yellow")
+        add_stat("🏅  Longest streak", f"{longest} day{'s' if longest != 1 else ''}")
+        add_stat("🛡️  Streak shields", str(shields))
+
         try:
             pomo_count = get_today_pomodoro_count()
         except Exception:
             pomo_count = 0
-            
-        t.append(f"{pomo_count}\n", style=f"bold {primary}")
+        add_stat("🍅  Today's Pomodoros", str(pomo_count), f"bold {primary}")
 
         self.update(t)

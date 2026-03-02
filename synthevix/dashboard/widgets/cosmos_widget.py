@@ -7,6 +7,8 @@ from synthevix.cosmos.models import get_today_mood, MOOD_EMOJIS, MOOD_LABELS
 from synthevix.cosmos.quotes import random_quote, format_quote
 from synthevix.core.config import load_config
 
+LABEL_WIDTH = 14
+
 
 class CosmosWidget(Static):
     """Displays daily cosmos metrics and inspiration."""
@@ -43,27 +45,27 @@ class CosmosWidget(Static):
 
         t = Text()
 
-        t.append("Today's Vibe:\n", style="dim")
+        t.append("Today's Vibe\n", style="dim")
         if today_mood:
             m = today_mood.get("mood", 3)
             e = today_mood.get("energy", 5)
             emoji = MOOD_EMOJIS.get(m, "😐")
             label = MOOD_LABELS.get(m, "Meh")
-            t.append(f"  {emoji}  Mood: {label}\n", style="bold")
-            t.append(f"  ⚡  Energy: {e}/10\n", style="bold yellow")
+            t.append(f"{'Mood':<{LABEL_WIDTH}}{emoji}  {label}\n", style="bold")
+            t.append(f"{'Energy':<{LABEL_WIDTH}}{e}/10\n", style="bold yellow")
         else:
-            t.append("  [not logged yet]\n", style="italic dim")
+            t.append(f"{'Mood':<{LABEL_WIDTH}}[not logged yet]\n", style="italic dim")
 
         # 7-day sparkline (oldest → newest)
         if history:
-            t.append("\n7-day trend: ", style="dim")
+            t.append(f"\n{'7-day trend':<{LABEL_WIDTH}}", style="dim")
             for entry in reversed(history[-7:]):
                 v = entry.get("mood", 3)
                 t.append("█", style=MOOD_COLORS.get(v, "white"))
             t.append("\n")
 
-        t.append("\nQuote of the Day:\n", style="dim")
+        t.append("\nQuote of the Day\n", style="dim")
         if self.quote_cache:
-            t.append(f"  {format_quote(self.quote_cache)}\n", style=f"italic {accent}")
+            t.append(f"{format_quote(self.quote_cache)}\n", style=f"italic {accent}")
 
         self.update(t)

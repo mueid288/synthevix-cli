@@ -4,7 +4,7 @@ import os
 from textual.app import App, ComposeResult
 from textual.containers import Grid
 from textual.widgets import Header, Footer, Static
-from textual import on
+from textual import on, events
 
 from synthevix.core.config import load_config
 from synthevix.core.themes import get_theme_data
@@ -21,6 +21,7 @@ class SynthevixDashboard(App):
     """A Textual dashboard combining all Synthevix modules."""
 
     CSS_PATH = "styles.tcss"
+    RESPONSIVE_BREAKPOINT = 120
     BINDINGS = [
         ("q", "quit", "Quit"),
         ("d", "focus_dashboard", "Refresh dashboard"),
@@ -32,6 +33,15 @@ class SynthevixDashboard(App):
     def on_mount(self) -> None:
         """Apply active theme on mount."""
         self._apply_synthevix_theme()
+        self._update_layout_mode(self.size.width)
+
+    def on_resize(self, event: events.Resize) -> None:
+        """Switch grid layout classes based on terminal width."""
+        self._update_layout_mode(event.size.width)
+
+    def _update_layout_mode(self, width: int) -> None:
+        """Apply narrow layout class under the responsive breakpoint."""
+        self.set_class(width < self.RESPONSIVE_BREAKPOINT, "narrow")
 
     def _apply_synthevix_theme(self) -> None:
         """Fetch the current config theme and map it to Textual's CSS design tokens."""
@@ -44,7 +54,7 @@ class SynthevixDashboard(App):
         warn = theme_data["warning"]
         err = theme_data["error"]
         succ = theme_data["success"]
-        panel_bg = "#111111" if "dark" in cfg.theme.active.lower() else "#ffffff"
+        panel_bg = "#0D1117"
 
         system = ColorSystem(
             primary=pri,
@@ -59,6 +69,28 @@ class SynthevixDashboard(App):
             "dark": system,
             "light": system,
         }
+
+    def action_focus_dashboard(self) -> None:
+        """Refresh all dashboard widgets and keep focus inside the grid."""
+        self.query_one(ProfileWidget).update_profile()
+        self.query_one(CosmosWidget).update_cosmos()
+        self.query_one(ForgeWidget).query_one("#forge-stats").update_forge()
+        self.query_one(ForgeWidget).update_aliases()
+        self.query_one(BrainWidget).update_brain()
+        self.query_one(QuestWidget).update_quests()
+
+        if not self.focused:
+            self.query_one(ProfileWidget).focus()
+
+        self.notify("Dashboard refreshed", title="Synthevix")
+
+    def action_cursor_down(self) -> None:
+        """Move focus forward across focusable dashboard widgets."""
+        self.focus_next()
+
+    def action_cursor_up(self) -> None:
+        """Move focus backward across focusable dashboard widgets."""
+        self.focus_previous()
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""

@@ -187,6 +187,15 @@ def cmd_import(
     console.print(f"  [bold {color}]✓[/bold {color}]  Data restored from {src}")
 
 
+@app.command("backup")
+def cmd_backup():
+    """Create a timestamped database backup."""
+    init_db()
+    dest = backup_db()
+    color = get_theme_data(load_config().theme.active)["primary"]
+    console.print(f"  [bold {color}]✓[/bold {color}]  Backup created at {dest}")
+
+
 def main():
     """Custom entry point to intercept custom aliases before Typer runs."""
     import sys
@@ -197,12 +206,11 @@ def main():
         potential_alias = sys.argv[1]
         
         # Don't intercept known top-level commands or flags
-        if not potential_alias.startswith("-") and potential_alias not in ["brain", "quest", "cosmos", "forge", "config", "stats", "dashboard", "tui", "import"]:
-            # Need DB init for models
-            init_db()
-            from synthevix.forge.models import list_aliases
-            
+        if not potential_alias.startswith("-") and potential_alias not in ["brain", "quest", "cosmos", "forge", "config", "stats", "dashboard", "tui", "import", "backup"]:
             try:
+                # Need DB init for models
+                init_db()
+                from synthevix.forge.models import list_aliases
                 aliases = list_aliases()
                 for a in aliases:
                     if a["alias"] == potential_alias:

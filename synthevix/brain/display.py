@@ -6,11 +6,14 @@ from typing import List
 
 from rich.console import Console
 from rich.panel import Panel
-from rich.syntax import Syntax
 from rich.table import Table
+from rich.syntax import Syntax
 from rich.text import Text
 
 from synthevix.core.utils import format_date, format_relative, parse_tags, truncate_text
+
+ENTRY_TITLE_WIDTH = 42
+TAG_CELL_WIDTH = 24
 
 
 def print_entries_table(entries: List[dict], console: Console, theme_color: str) -> None:
@@ -25,11 +28,11 @@ def print_entries_table(entries: List[dict], console: Console, theme_color: str)
         border_style="dim",
         expand=False,
     )
-    table.add_column("ID", style="bold", width=5, justify="right")
-    table.add_column("Type", width=9)
-    table.add_column("Title / Preview", width=45)
-    table.add_column("Tags", width=20)
-    table.add_column("Date", width=12)
+    table.add_column("ID", style="bold", width=4, justify="right")
+    table.add_column("Type", width=10, justify="left")
+    table.add_column("Title / Preview", width=ENTRY_TITLE_WIDTH, justify="left")
+    table.add_column("Tags", width=TAG_CELL_WIDTH, justify="left")
+    table.add_column("Created", width=16, justify="left")
 
     type_colors = {
         "note":     "cyan",
@@ -48,14 +51,20 @@ def print_entries_table(entries: List[dict], console: Console, theme_color: str)
         t = e.get("type", "note")
         color = type_colors.get(t, "white")
         icon = type_icons.get(t, "•")
-        label = f"[{color}]{icon} {t}[/{color}]"
+        label = f"[{color}]{icon}  {t}[/{color}]"
 
-        preview = e.get("title") or truncate_text(e.get("content", ""), 40)
+        preview = e.get("title") or truncate_text(e.get("content", ""), ENTRY_TITLE_WIDTH)
         tags_list = parse_tags(e.get("tags", "[]"))
-        tags_str = " ".join(f"[black on {theme_color}] {t} [/]" for t in tags_list) if tags_list else "[dim]—[/dim]"
+        tags_str = ", ".join(f"#{tag}" for tag in tags_list) if tags_list else "—"
         date_str = format_relative(e.get("created_at"))
 
-        table.add_row(str(e["id"]), label, truncate_text(preview, 44), tags_str, date_str)
+        table.add_row(
+            str(e["id"]),
+            label,
+            truncate_text(preview, ENTRY_TITLE_WIDTH),
+            truncate_text(tags_str, TAG_CELL_WIDTH),
+            date_str,
+        )
 
     console.print(table)
 
@@ -67,21 +76,22 @@ def print_entry_detail(entry: dict, console: Console, theme_color: str) -> None:
     tags = parse_tags(entry.get("tags", "[]"))
     tags_str = "  ".join(f"[cyan]#{tg}[/cyan]" for tg in tags) or "[dim]no tags[/dim]"
 
-    meta = (
-        f"[dim]ID:[/dim] {entry['id']}  "
-        f"[dim]Type:[/dim] {t}  "
-        f"[dim]Created:[/dim] {format_date(entry.get('created_at'))}  "
-        f"[dim]Updated:[/dim] {format_date(entry.get('updated_at'))}\n"
-        f"{tags_str}"
-    )
+    meta_table = Table.grid(padding=(0, 2))
+    meta_table.add_column(style="dim", width=8, justify="right")
+    meta_table.add_column(justify="left")
+    meta_table.add_row("ID", str(entry["id"]))
+    meta_table.add_row("Type", t)
+    meta_table.add_row("Created", format_date(entry.get("created_at")))
+    meta_table.add_row("Updated", format_date(entry.get("updated_at")))
+    meta_table.add_row("Tags", tags_str)
 
     if entry.get("url"):
-        meta += f"\n[dim]URL:[/dim] {entry['url']}"
+        meta_table.add_row("URL", entry["url"])
 
     # For snippets, use syntax highlighting
     if t == "snippet" and entry.get("language"):
         console.print(Panel(
-            Text.from_markup(meta),
+            meta_table,
             title=f"[bold {theme_color}]{title}[/bold {theme_color}]",
             border_style=theme_color,
         ))
@@ -93,8 +103,11 @@ def print_entry_detail(entry: dict, console: Console, theme_color: str) -> None:
         )
         console.print(syntax)
     else:
+        body = Table.grid(padding=(1, 0))
+        body.add_row(meta_table)
+        body.add_row(Text(entry.get("content", "")))
         console.print(Panel(
-            Text.from_markup(f"{meta}\n\n{entry.get('content', '')}"),
+            body,
             title=f"[bold {theme_color}]{title}[/bold {theme_color}]",
             border_style=theme_color,
         ))

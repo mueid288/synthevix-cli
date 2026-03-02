@@ -9,15 +9,30 @@ Screen {
     grid-size: 3 3;
     grid-columns: 1fr 1fr 1fr;
     grid-rows: 1fr 1fr 1fr;
-    margin: 1 2;
-    grid-gutter: 1 2;
+    margin: 0 1;
+    grid-gutter: 1 1;
 }
 
-BaseWidget {
+Screen.narrow #main-grid {
+    grid-size: 2 4;
+    grid-columns: 1fr 1fr;
+    grid-rows: 1fr 1fr 1fr 1fr;
+}
+
+#profile-widget,
+#cosmos-widget,
+#forge-widget {
     border: round $primary;
     background: $panel;
-    padding: 1 2;
-    content-align: center middle;
+    padding: 1 1;
+    color: $text;
+}
+
+#brain-widget,
+#quest-widget {
+    border: round $primary;
+    background: $panel;
+    padding: 0;
     color: $text;
 }
 
@@ -39,6 +54,7 @@ QuestWidget {
 #forge-widget {
     row-span: 1;
     column-span: 1;
+    layout: vertical;
 }
 
 #brain-widget {
@@ -49,6 +65,34 @@ QuestWidget {
 #quest-widget {
     row-span: 2;
     column-span: 2;
+}
+
+Screen.narrow #profile-widget,
+Screen.narrow #cosmos-widget,
+Screen.narrow #forge-widget {
+    row-span: 1;
+    column-span: 1;
+}
+
+Screen.narrow #brain-widget {
+    row-span: 2;
+    column-span: 1;
+}
+
+Screen.narrow #quest-widget {
+    row-span: 3;
+    column-span: 1;
+}
+
+#forge-aliases-header {
+    margin: 0 0 0 1;
+    height: auto;
+    color: $text;
+}
+
+#forge-aliases-table {
+    margin: 0;
+    height: 1fr;
 }
 
 DataTable {

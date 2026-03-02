@@ -34,11 +34,13 @@ class ForgeStats(Static):
         primary = self.app.design.get("primary", "#ffffff")
 
         t = Text()
+        label_width = 20
 
-        t.append("💻  Coding streak: ", style="dim")
+        t.append(f"{'💻  Coding streak':<{label_width}}", style="dim")
         t.append(f"{streak} day{'s' if streak != 1 else ''}\n", style=f"bold {primary}")
 
-        t.append("📈  Today's commits: ", style="dim")
+        commits_label = "📈  Today's commits"
+        t.append(f"{commits_label:<{label_width}}", style="dim")
         t.append(f"{commits_today}\n\n", style="bold")
 
         # 30-day mini heatmap
@@ -46,7 +48,7 @@ class ForgeStats(Static):
             import datetime as dt
             commit_map = {r["date"]: r.get("commits", 0) for r in streak_data}
             today = dt.date.today()
-            t.append("Activity (30d): ", style="dim")
+            t.append(f"{'Activity (30d)':<{label_width}}", style="dim")
             for i in range(29, -1, -1):
                 d = (today - dt.timedelta(days=i)).isoformat()
                 c = commit_map.get(d, 0)
@@ -79,16 +81,16 @@ class ForgeWidget(Vertical):
 
     def compose(self):
         yield ForgeStats(id="forge-stats")
-        
-        primary = self.app.design.get("primary", "#ffffff")
-        yield Static("\n⚡ [bold]Aliases[/bold]\n", id="forge-aliases-header")
-        
+
+        yield Static("⚡  [bold]Aliases[/bold]\n", id="forge-aliases-header")
+
         table = DataTable(id="forge-aliases-table", cursor_type="row")
         yield table
 
     def on_mount(self):
         table = self.query_one("#forge-aliases-table", DataTable)
-        table.add_columns("Trigger", "Command")
+        table.add_column("Trigger", width=14)
+        table.add_column("Command", width=38)
         self.update_aliases()
 
     def update_aliases(self):
@@ -102,7 +104,11 @@ class ForgeWidget(Vertical):
             self._aliases = []
             
         for a in self._aliases:
-            table.add_row(Text(a["alias"], style="cyan"), Text(a["command"], style="dim"))
+            alias = (a["alias"] or "")[:14]
+            command = (a["command"] or "")
+            if len(command) > 38:
+                command = command[:35] + "..."
+            table.add_row(Text(alias, style="cyan"), Text(command, style="dim"))
 
     @on(DataTable.RowSelected, "#forge-aliases-table")
     def on_alias_selected(self, event: DataTable.RowSelected) -> None:

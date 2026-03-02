@@ -205,7 +205,7 @@ def _seed_achievements(conn: sqlite3.Connection) -> None:
 
 def _run_migrations(conn: sqlite3.Connection) -> None:
     """Apply schema upgrades in version order."""
-    row = conn.execute("SELECT version FROM schema_version LIMIT 1").fetchone()
+    row = conn.execute("SELECT COALESCE(MAX(version), 0) FROM schema_version").fetchone()
     version = row[0] if row else 0
 
     if version < 2:

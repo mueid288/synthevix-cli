@@ -38,7 +38,7 @@ def cmd_add(
     """Add a new brain entry."""
     valid_types = ("note", "journal", "snippet", "bookmark")
     if type not in valid_types:
-        console.print(f"[error]Invalid type '{type}'. Choose from: {', '.join(valid_types)}[/error]")
+        console.print(f"[bold red]Invalid type '{type}'. Choose from: {', '.join(valid_types)}[/bold red]")
         raise typer.Exit(1)
 
     # If no content given, open $EDITOR
@@ -53,7 +53,7 @@ def cmd_add(
         os.unlink(tmp)
 
     if not content:
-        console.print("[warning]Empty content, entry not saved.[/warning]")
+        console.print("[bold yellow]Empty content, entry not saved.[/bold yellow]")
         raise typer.Exit(0)
 
     tags = [t.strip() for t in tag.split(",")] if tag else []
@@ -62,7 +62,7 @@ def cmd_add(
         tags=tags, language=language, url=url,
     )
     color = _theme_color()
-    console.print(f"\n[bold {color}]✓ Entry #{entry_id} saved![/bold {color}]")
+    console.print(f"\n  [bold {color}]✓[/bold {color}]  Entry #{entry_id} saved.\n")
 
 
 @app.command("list")
@@ -74,6 +74,7 @@ def cmd_list(
 ):
     """List brain entries with optional filters."""
     entries = models.list_entries(type_filter=type, tag_filter=tag, last=last, limit=limit)
+    console.print()
     print_entries_table(entries, console, _theme_color())
 
 
@@ -83,6 +84,7 @@ def cmd_search(
 ):
     """Full-text search across all brain entries."""
     entries = models.search_entries(query)
+    console.print()
     print_entries_table(entries, console, _theme_color())
 
 
@@ -93,7 +95,7 @@ def cmd_view(
     """View a brain entry by ID."""
     entry = models.get_entry(entry_id)
     if not entry:
-        console.print(f"[error]No entry found with ID {entry_id}.[/error]")
+        console.print(f"[bold red]No entry found with ID {entry_id}.[/bold red]")
         raise typer.Exit(1)
     print_entry_detail(entry, console, _theme_color())
 
@@ -105,7 +107,7 @@ def cmd_edit(
     """Open an entry in $EDITOR for editing."""
     entry = models.get_entry(entry_id)
     if not entry:
-        console.print(f"[error]No entry found with ID {entry_id}.[/error]")
+        console.print(f"[bold red]No entry found with ID {entry_id}.[/bold red]")
         raise typer.Exit(1)
 
     with tempfile.NamedTemporaryFile(suffix=".md", mode="w", delete=False) as f:
@@ -125,7 +127,7 @@ def cmd_edit(
 
     models.update_entry(entry_id, content=new_content)
     color = _theme_color()
-    console.print(f"[bold {color}]✓ Entry #{entry_id} updated![/bold {color}]")
+    console.print(f"\n  [bold {color}]✓[/bold {color}]  Entry #{entry_id} updated.\n")
 
 
 @app.command("delete")
@@ -136,7 +138,7 @@ def cmd_delete(
     """Delete a brain entry."""
     entry = models.get_entry(entry_id)
     if not entry:
-        console.print(f"[error]No entry found with ID {entry_id}.[/error]")
+        console.print(f"[bold red]No entry found with ID {entry_id}.[/bold red]")
         raise typer.Exit(1)
 
     if not force:
@@ -146,7 +148,8 @@ def cmd_delete(
             return
 
     models.delete_entry(entry_id)
-    console.print(f"[success]Entry #{entry_id} deleted.[/success]")
+    color = _theme_color()
+    console.print(f"\n  [bold {color}]✓[/bold {color}]  Entry #{entry_id} deleted.\n")
 
 
 @app.command("tags")
@@ -169,7 +172,7 @@ def cmd_export(
 ):
     """Export brain entries to Markdown or JSON."""
     if format not in ("md", "json"):
-        console.print("[error]Invalid format. Use 'md' or 'json'.[/error]")
+        console.print("[bold red]Invalid format. Use 'md' or 'json'.[/bold red]")
         raise typer.Exit(1)
     path = models.export_entries(format=format, type_filter=type)
     color = _theme_color()

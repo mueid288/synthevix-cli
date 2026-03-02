@@ -42,6 +42,7 @@ def print_mood_history(entries: List[dict], console: Console, theme_color: str) 
         )
 
     console.print(table)
+    console.print()
     _print_mood_bars(entries, console, theme_color)
 
 

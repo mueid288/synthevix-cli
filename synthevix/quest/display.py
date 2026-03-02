@@ -40,6 +40,7 @@ def print_quests_table(quests: List[dict], console: Console, theme_color: str) -
         show_header=True,
         header_style=f"bold {theme_color}",
         border_style="dim",
+        expand=False,
     )
     table.add_column("ID", width=5, justify="right", style="bold")
     table.add_column("Status", width=6)

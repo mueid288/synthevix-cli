@@ -47,11 +47,11 @@ def cmd_mood(
         try:
             mood = int(mood_str)
         except ValueError:
-            console.print("[error]Invalid mood value.[/error]")
+            console.print("[bold red]Invalid mood value.[/bold red]")
             raise typer.Exit(1)
 
     if not (1 <= mood <= 6):
-        console.print("[error]Mood must be between 1 and 6.[/error]")
+        console.print("[bold red]Mood must be between 1 and 6.[/bold red]")
         raise typer.Exit(1)
 
     if energy is None:
@@ -63,7 +63,7 @@ def cmd_mood(
                 energy = None
 
     if energy is not None and not (1 <= energy <= 10):
-        console.print("[error]Energy must be between 1 and 10.[/error]")
+        console.print("[bold red]Energy must be between 1 and 10.[/bold red]")
         raise typer.Exit(1)
 
     mood_id = models.log_mood(mood, energy, note)
@@ -80,6 +80,7 @@ def cmd_history(
     from synthevix.core.utils import parse_duration
     days = parse_duration(last)
     entries = models.get_mood_history(days=days)
+    console.print()
     print_mood_history(entries, console, _theme_color())
 
     stats = models.get_mood_stats(days=days)

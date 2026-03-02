@@ -69,7 +69,7 @@ def theme_set(name: str = typer.Argument(..., help="Theme name to activate")):
     available = theme_names()
     all_themes = list_themes()
     if name not in all_themes:
-        console.print(f"[error]Theme '{name}' not found. Available: {', '.join(available)}[/error]")
+        console.print(f"[bold red]Theme '{name}' not found. Available: {', '.join(available)}[/bold red]")
         raise typer.Exit(1)
     cfg = load_config()
     cfg.theme.active = name

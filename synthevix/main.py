@@ -109,7 +109,7 @@ def _print_quick_stats(cfg, theme, color: str) -> None:
         m = today_mood.get("mood", 3)
         mood_str = f"{MOOD_EMOJIS.get(m, '😐')} {MOOD_LABELS.get(m, 'Meh')}"
 
-    bar = xp_bar(xp_into, xp_needed, width=22)
+    bar = xp_bar(xp_into, xp_needed, width=24)
 
     text = Text()
     text.append(f"  ⚔  Level {level}  ", style=f"bold {color}")
@@ -175,7 +175,7 @@ def cmd_import(
     """Restore database from a backup file."""
     src = Path(file)
     if not src.exists():
-        console.print(f"[error]File not found: {file}[/error]")
+        console.print(f"[bold red]File not found: {file}[/bold red]")
         raise typer.Exit(1)
     ok = typer.confirm(f"Replace current data.db with '{src.name}'? This cannot be undone.")
     if not ok:

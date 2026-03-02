@@ -47,11 +47,11 @@ def cmd_add(
     """Add a new quest."""
     valid_diff = ("trivial", "easy", "medium", "hard", "epic", "legendary")
     if diff not in valid_diff:
-        console.print(f"[error]Invalid difficulty '{diff}'. Choose from: {', '.join(valid_diff)}[/error]")
+        console.print(f"[bold red]Invalid difficulty '{diff}'. Choose from: {', '.join(valid_diff)}[/bold red]")
         raise typer.Exit(1)
     valid_repeat = ("none", "daily", "weekly")
     if repeat not in valid_repeat:
-        console.print(f"[error]Invalid repeat '{repeat}'. Choose: none | daily | weekly[/error]")
+        console.print(f"[bold red]Invalid repeat '{repeat}'. Choose: none | daily | weekly[/bold red]")
         raise typer.Exit(1)
     quest_id = models.add_quest(title, difficulty=diff, description=description,
                                 due_date=due, repeat=repeat)
@@ -69,6 +69,7 @@ def cmd_list(
     """List quests."""
     filter_status = None if status == "all" else status
     quests = models.list_quests(status=filter_status, limit=limit)
+    console.print()
     print_quests_table(quests, console, _theme_color())
 
 
@@ -80,7 +81,7 @@ def cmd_complete(
     try:
         result = models.complete_quest(quest_id, xp_multiplier=_multiplier())
     except ValueError as e:
-        console.print(f"[error]{e}[/error]")
+        console.print(f"[bold red]{e}[/bold red]")
         raise typer.Exit(1)
 
     color = _theme_color()
@@ -122,7 +123,7 @@ def cmd_fail(
     try:
         result = models.fail_quest(quest_id)
     except ValueError as e:
-        console.print(f"[error]{e}[/error]")
+        console.print(f"[bold red]{e}[/bold red]")
         raise typer.Exit(1)
         
     from synthevix.core.sound import play_sound
@@ -139,7 +140,7 @@ def cmd_delete(
     """Permanently delete a quest."""
     quest = models.get_quest(quest_id)
     if not quest:
-        console.print(f"[error]Quest #{quest_id} not found.[/error]")
+        console.print(f"[bold red]Quest #{quest_id} not found.[/bold red]")
         raise typer.Exit(1)
     ok = Confirm.ask(
         f"Delete quest #{quest_id}: '{quest['title']}'? This cannot be undone."
@@ -160,7 +161,7 @@ def cmd_reset(
     try:
         models.reset_quest(quest_id)
     except ValueError as e:
-        console.print(f"[error]{e}[/error]")
+        console.print(f"[bold red]{e}[/bold red]")
         raise typer.Exit(1)
     color = _theme_color()
     console.print(f"\n  [bold {color}]🔄[/bold {color}]  Quest #{quest_id} is ready for the next cycle.\n")
@@ -271,7 +272,7 @@ def cmd_template(
     """Load a predefined set of quests."""
     name = name.lower()
     if name not in PRESET_TEMPLATES:
-        console.print(f"[error]Template '{name}' not found. Available: {', '.join(PRESET_TEMPLATES.keys())}[/error]")
+        console.print(f"[bold red]Template '{name}' not found. Available: {', '.join(PRESET_TEMPLATES.keys())}[/bold red]")
         raise typer.Exit(1)
         
     color = _theme_color()

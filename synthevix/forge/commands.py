@@ -47,7 +47,7 @@ def cmd_init(
         scaffold_project(template_id, dest, name)
         console.print(f"  [bold {color}]✓[/bold {color}]  Project [bold]{name}[/bold] created at {dest}")
     except ValueError as e:
-        console.print(f"  [error]{e}[/error]")
+        console.print(f"  [bold red]{e}[/bold red]")
         raise typer.Exit(1)
 
 
@@ -107,7 +107,8 @@ def cmd_quicksave():
 def cmd_undo():
     """Undo the last commit (keeps changes staged)."""
     result = undo_last()
-    console.print(f"  {result}")
+    color = _theme_color()
+    console.print(f"\n  [bold {color}]↩  Git undo[/bold {color}]\n  {result}\n")
 
 
 @git_app.command("cleanup")
@@ -218,13 +219,23 @@ def alias_list():
 
 
 @alias_app.command("remove")
-def alias_remove(alias: str = typer.Argument(..., help="Alias to remove")):
+def alias_remove(
+    alias: str = typer.Argument(..., help="Alias to remove"),
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+):
     """Remove a custom alias."""
+    from rich.prompt import Confirm
+    if not force:
+        ok = Confirm.ask(f"Delete alias '{alias}'? This cannot be undone.")
+        if not ok:
+            console.print("[dim]Cancelled.[/dim]")
+            return
     removed = models.delete_alias(alias)
+    color = _theme_color()
     if removed:
-        console.print(f"  [dim]Alias '{alias}' removed.[/dim]")
+        console.print(f"\n  [bold {color}]✓[/bold {color}]  Alias [cyan]{alias}[/cyan] deleted.\n")
     else:
-        console.print(f"  [error]Alias '{alias}' not found.[/error]")
+        console.print(f"[bold red]Alias '{alias}' not found.[/bold red]")
 
 
 # ── forge stats ─────────────────────────────────────────────────────────────────

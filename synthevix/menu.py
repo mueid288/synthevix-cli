@@ -76,6 +76,7 @@ MODULES = [
         ("✅  Complete a quest",     ["quest", "complete"]),
         ("💀  Fail a quest",         ["quest", "fail"]),
         ("🗑   Delete a quest",        ["quest", "delete"]),
+        ("🔄  Reset recurring quest",  ["quest", "reset"]),
         ("📊  My stats & level",     ["quest", "stats"]),
         ("🏆  Achievements",         ["quest", "achievements"]),
         ("📅  Daily challenges",     ["quest", "daily"]),
@@ -150,7 +151,8 @@ def _prompt_extra(cli_args: List[str], style: Style) -> List[str]:
 
     # Commands that need a single ID
     id_cmds = {"complete": "Quest ID to complete", "fail": "Quest ID to fail",
-               "view": "Entry ID", "edit": "Entry ID", "delete": "Entry ID"}
+               "view": "Entry ID", "edit": "Entry ID", "delete": "Entry ID",
+               "reset": "Quest ID to reset"}
     if last in id_cmds:
         val = questionary.text(f"{id_cmds[last]}:", style=style).ask()
         return [val.strip()] if val and val.strip() else []

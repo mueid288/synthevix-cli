@@ -41,15 +41,23 @@ def cmd_add(
                              help="Difficulty: trivial | easy | medium | hard | epic | legendary"),
     description: Optional[str] = typer.Option(None, "--desc", help="Optional description"),
     due: Optional[str] = typer.Option(None, "--due", help="Due date (YYYY-MM-DD)"),
+    repeat: str = typer.Option("none", "--repeat", "-r",
+                               help="Recurrence: none | daily | weekly"),
 ):
     """Add a new quest."""
-    valid = ("trivial", "easy", "medium", "hard", "epic", "legendary")
-    if diff not in valid:
-        console.print(f"[error]Invalid difficulty '{diff}'. Choose from: {', '.join(valid)}[/error]")
+    valid_diff = ("trivial", "easy", "medium", "hard", "epic", "legendary")
+    if diff not in valid_diff:
+        console.print(f"[error]Invalid difficulty '{diff}'. Choose from: {', '.join(valid_diff)}[/error]")
         raise typer.Exit(1)
-    quest_id = models.add_quest(title, difficulty=diff, description=description, due_date=due)
+    valid_repeat = ("none", "daily", "weekly")
+    if repeat not in valid_repeat:
+        console.print(f"[error]Invalid repeat '{repeat}'. Choose: none | daily | weekly[/error]")
+        raise typer.Exit(1)
+    quest_id = models.add_quest(title, difficulty=diff, description=description,
+                                due_date=due, repeat=repeat)
     color = _theme_color()
-    console.print(f"\n[bold {color}]⚔  Quest #{quest_id} added![/bold {color}]  [dim]{title}[/dim]")
+    repeat_str = f"  [dim](repeats {repeat})[/dim]" if repeat != "none" else ""
+    console.print(f"\n[bold {color}]⚔  Quest #{quest_id} added![/bold {color}]  [dim]{title}[/dim]{repeat_str}")
 
 
 @app.command("list")
@@ -133,6 +141,20 @@ def cmd_delete(
     models.delete_quest(quest_id)
     color = _theme_color()
     console.print(f"\n  [bold {color}]✓[/bold {color}]  Quest #{quest_id} deleted.\n")
+
+
+@app.command("reset")
+def cmd_reset(
+    quest_id: int = typer.Argument(..., help="Quest ID to reset for next cycle"),
+):
+    """Reactivate a recurring quest for its next cycle."""
+    try:
+        models.reset_quest(quest_id)
+    except ValueError as e:
+        console.print(f"[error]{e}[/error]")
+        raise typer.Exit(1)
+    color = _theme_color()
+    console.print(f"\n  [bold {color}]🔄[/bold {color}]  Quest #{quest_id} is ready for the next cycle.\n")
 
 
 @app.command("stats")

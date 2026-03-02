@@ -237,3 +237,30 @@ def test_quest_repeat_defaults_to_none():
     qid = add_quest("Normal quest", difficulty="easy")
     q = get_quest(qid)
     assert q["repeat"] == "none"
+
+
+def test_reset_recurring_quest_reactivates_it():
+    from synthevix.quest.models import add_quest, complete_quest, reset_quest, get_quest
+    qid = add_quest("Daily exercise", difficulty="easy", repeat="daily")
+    complete_quest(qid)
+    assert get_quest(qid)["status"] == "completed"
+    reset_quest(qid)
+    q = get_quest(qid)
+    assert q["status"] == "active"
+    assert q["completed_at"] is None
+    assert q["xp_earned"] == 0
+
+def test_reset_non_recurring_quest_raises():
+    from synthevix.quest.models import add_quest, complete_quest, reset_quest
+    import pytest
+    qid = add_quest("One-time quest", difficulty="easy")
+    complete_quest(qid)
+    with pytest.raises(ValueError, match="not a recurring"):
+        reset_quest(qid)
+
+def test_reset_active_quest_raises():
+    from synthevix.quest.models import add_quest, reset_quest
+    import pytest
+    qid = add_quest("Active recurring", difficulty="easy", repeat="weekly")
+    with pytest.raises(ValueError, match="already active"):
+        reset_quest(qid)

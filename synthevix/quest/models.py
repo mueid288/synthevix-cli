@@ -14,14 +14,15 @@ def add_quest(
     difficulty: str = "medium",
     description: Optional[str] = None,
     due_date: Optional[str] = None,
+    repeat: str = "none",
 ) -> int:
     """Insert a new quest. Returns the new quest ID."""
     conn = get_connection()
     with conn:
         cur = conn.execute("""
-            INSERT INTO quests (title, description, difficulty, due_date)
-            VALUES (?, ?, ?, ?)
-        """, (title, description, difficulty, due_date))
+            INSERT INTO quests (title, description, difficulty, due_date, repeat)
+            VALUES (?, ?, ?, ?, ?)
+        """, (title, description, difficulty, due_date, repeat))
     conn.close()
     return cur.lastrowid
 
@@ -152,6 +153,33 @@ def fail_quest(quest_id: int) -> dict:
     return {"xp_penalty": penalty}
 
 
+def reset_quest(quest_id: int) -> bool:
+    """Reactivate a recurring quest for its next cycle.
+
+    Raises ValueError if quest not found, not recurring, or already active.
+    """
+    conn = get_connection()
+    quest = conn.execute("SELECT * FROM quests WHERE id = ?", (quest_id,)).fetchone()
+    if not quest:
+        conn.close()
+        raise ValueError(f"Quest {quest_id} not found.")
+    quest = dict(quest)
+    if quest.get("repeat", "none") == "none":
+        conn.close()
+        raise ValueError(f"Quest {quest_id} is not a recurring quest (repeat=none).")
+    if quest["status"] == "active":
+        conn.close()
+        raise ValueError(f"Quest {quest_id} is already active.")
+    with conn:
+        conn.execute("""
+            UPDATE quests
+            SET status = 'active', completed_at = NULL, xp_earned = 0
+            WHERE id = ?
+        """, (quest_id,))
+    conn.close()
+    return True
+
+
 def get_profile() -> dict:
     """Return the user_profile row as a dict."""
     conn = get_connection()
@@ -205,3 +233,35 @@ def count_quests_completed() -> int:
     n = conn.execute("SELECT COUNT(*) FROM quests WHERE status = 'completed'").fetchone()[0]
     conn.close()
     return n
+
+
+def delete_quest(quest_id: int) -> bool:
+    """Delete a quest by ID. Returns True if a row was removed, False otherwise."""
+    conn = get_connection()
+    with conn:
+        cur = conn.execute("DELETE FROM quests WHERE id = ?", (quest_id,))
+    conn.close()
+    return cur.rowcount > 0
+
+
+def update_profile(**fields) -> None:
+    """Update arbitrary fields on the single user_profile row (id=1).
+
+    Example::
+        update_profile(total_xp=500, level=3)
+    """
+    if not fields:
+        return
+    allowed = {
+        "username", "total_xp", "level", "current_streak",
+        "longest_streak", "streak_shields", "last_quest_date",
+    }
+    invalid = set(fields) - allowed
+    if invalid:
+        raise ValueError(f"Unknown profile fields: {invalid}")
+    set_clause = ", ".join(f"{k} = ?" for k in fields)
+    values = list(fields.values())
+    conn = get_connection()
+    with conn:
+        conn.execute(f"UPDATE user_profile SET {set_clause} WHERE id = 1", values)
+    conn.close()

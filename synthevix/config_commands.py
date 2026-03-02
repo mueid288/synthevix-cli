@@ -44,12 +44,14 @@ def theme_list():
 
     active = load_config().theme.active
     vibes = {
-        "cyberpunk": "Neon-lit, futuristic",
-        "dracula":   "Classic dark theme",
-        "nord":      "Cool, Scandinavian",
-        "synthwave": "Retro 80s",
-        "monokai":   "Developer classic",
-        "solarized": "Warm, balanced",
+        "cyberpunk":   "Neon-lit, futuristic",
+        "dracula":     "Classic dark theme",
+        "nord":        "Cool, Scandinavian",
+        "synthwave":   "Retro 80s",
+        "monokai":     "Developer classic",
+        "solarized":   "Warm, balanced",
+        "tokyo-night": "Dark & cinematic",
+        "catppuccin":  "Soft pastel dark",
     }
 
     for name, t in themes.items():

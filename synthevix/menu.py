@@ -15,6 +15,7 @@ from rich.rule import Rule
 from synthevix.core.banner import print_banner
 from synthevix.cosmos.greetings import get_greeting, get_time_emoji
 from synthevix.cosmos.quotes import format_quote, random_quote
+from synthevix.core.themes import theme_names
 
 
 # ── Theme → questionary style ───────────────────────────────────────────────────
@@ -174,7 +175,7 @@ def _prompt_extra(cli_args: List[str], style: Style) -> List[str]:
     if last == "set":
         val = questionary.select(
             "Choose theme:",
-            choices=["cyberpunk", "dracula", "nord", "synthwave", "monokai", "solarized"],
+            choices=theme_names(),
             style=style,
         ).ask()
         return [val] if val else []
@@ -182,7 +183,7 @@ def _prompt_extra(cli_args: List[str], style: Style) -> List[str]:
     if last == "preview":
         val = questionary.select(
             "Preview theme:",
-            choices=["cyberpunk", "dracula", "nord", "synthwave", "monokai", "solarized"],
+            choices=theme_names(),
             style=style,
         ).ask()
         return [val] if val else []

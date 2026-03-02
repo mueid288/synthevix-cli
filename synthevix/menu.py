@@ -34,6 +34,26 @@ def _q_style(hex_color: str) -> Style:
     ])
 
 
+def _overdue_count() -> int:
+    """Return the number of active quests past their due date."""
+    import datetime
+    try:
+        from synthevix.quest.models import list_quests
+        today = datetime.date.today()
+        count = 0
+        for q in list_quests(status="active", limit=200):
+            due = q.get("due_date")
+            if due:
+                try:
+                    if datetime.date.fromisoformat(str(due).split()[0]) < today:
+                        count += 1
+                except Exception:
+                    pass
+        return count
+    except Exception:
+        return 0
+
+
 # ── Menu data ────────────────────────────────────────────────────────────────────
 # Each module: (label, sub-items)
 # Sub-items: (label, cli_args)
@@ -55,6 +75,7 @@ MODULES = [
         ("📋  Active quests",        ["quest", "list"]),
         ("✅  Complete a quest",     ["quest", "complete"]),
         ("💀  Fail a quest",         ["quest", "fail"]),
+        ("🗑   Delete a quest",        ["quest", "delete"]),
         ("📊  My stats & level",     ["quest", "stats"]),
         ("🏆  Achievements",         ["quest", "achievements"]),
         ("📅  Daily challenges",     ["quest", "daily"]),
@@ -211,6 +232,18 @@ def run_menu(console: Console, initial_hex_color: str, username: str = "Commande
         console.print(Align.center(f"[dim italic]✨  {format_quote(quote)}[/dim italic]\n"))
 
         _print_quick_stats(cfg, theme_data, hex_color)
+
+        # Overdue banner
+        n_overdue = _overdue_count()
+        if n_overdue:
+            from rich.panel import Panel
+            console.print(Align.center(Panel(
+                f"[bold red]⚠  {n_overdue} quest{'s' if n_overdue > 1 else ''} past due![/bold red]\n"
+                f"[dim]Run 'synthevix quest list' to review.[/dim]",
+                border_style="red",
+                expand=False,
+            )))
+            console.print()
 
         console.print(Align.center(Rule("Navigation", style=f"bold {hex_color}")))
         console.print()

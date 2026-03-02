@@ -115,6 +115,26 @@ def cmd_fail(
     console.print(f"\n  [dim]💀 Quest failed. -{penalty} XP penalty applied.[/dim]")
 
 
+@app.command("delete")
+def cmd_delete(
+    quest_id: int = typer.Argument(..., help="Quest ID to delete"),
+):
+    """Permanently delete a quest."""
+    quest = models.get_quest(quest_id)
+    if not quest:
+        console.print(f"[error]Quest #{quest_id} not found.[/error]")
+        raise typer.Exit(1)
+    ok = Confirm.ask(
+        f"Delete quest #{quest_id}: '{quest['title']}'? This cannot be undone."
+    )
+    if not ok:
+        console.print("[dim]Cancelled.[/dim]")
+        return
+    models.delete_quest(quest_id)
+    color = _theme_color()
+    console.print(f"\n  [bold {color}]✓[/bold {color}]  Quest #{quest_id} deleted.\n")
+
+
 @app.command("stats")
 def cmd_stats():
     """View your XP, level, streak, and adventure stats."""

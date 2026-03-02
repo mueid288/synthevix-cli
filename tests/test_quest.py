@@ -150,3 +150,90 @@ def test_first_blood_unlocked_on_first_completion():
 
     achievement_ids = [a.id for a in result.get("new_achievements", [])]
     assert "first_blood" in achievement_ids
+
+
+# ── update_profile Tests ─────────────────────────────────────────────────────
+
+def test_update_profile_updates_total_xp():
+    from synthevix.quest.models import get_profile, update_profile
+    update_profile(total_xp=999)
+    assert get_profile()["total_xp"] == 999
+
+
+def test_update_profile_updates_multiple_fields():
+    from synthevix.quest.models import get_profile, update_profile
+    update_profile(total_xp=200, level=3, current_streak=5)
+    p = get_profile()
+    assert p["total_xp"] == 200
+    assert p["level"] == 3
+    assert p["current_streak"] == 5
+
+
+def test_update_profile_partial_update_does_not_reset_other_fields():
+    from synthevix.quest.models import add_quest, complete_quest, get_profile, update_profile
+    add_quest("A quest", difficulty="easy")
+    complete_quest(1)
+    streak_before = get_profile()["current_streak"]
+    update_profile(total_xp=1)
+    assert get_profile()["current_streak"] == streak_before
+
+
+# ── delete_quest Tests ───────────────────────────────────────────────────────
+
+def test_delete_quest_removes_it():
+    from synthevix.quest.models import add_quest, delete_quest, list_quests
+    add_quest("To be deleted", difficulty="trivial")
+    assert len(list_quests(status="active")) == 1
+    delete_quest(1)
+    assert list_quests(status=None) == []
+
+
+def test_delete_quest_returns_true_when_found():
+    from synthevix.quest.models import add_quest, delete_quest
+    add_quest("Gone quest", difficulty="easy")
+    assert delete_quest(1) is True
+
+
+def test_delete_quest_returns_false_when_not_found():
+    from synthevix.quest.models import delete_quest
+    assert delete_quest(999) is False
+
+
+# ── Pomodoro Achievement Check Tests ─────────────────────────────────────────
+
+def test_pomodoro_xp_triggers_achievement_check(monkeypatch):
+    """Pomodoro completion must call check_and_unlock so achievements can fire."""
+    from unittest.mock import patch, MagicMock
+
+    called_with = []
+
+    def fake_check(profile: dict):
+        called_with.append(profile)
+        return []
+
+    monkeypatch.setattr("synthevix.quest.achievements.check_and_unlock", fake_check)
+
+    from synthevix.quest.pomodoro import run_pomodoro
+
+    live_mock = MagicMock()
+    live_mock.__enter__ = MagicMock(return_value=live_mock)
+    live_mock.__exit__ = MagicMock(return_value=False)
+
+    with patch("time.sleep"), \
+         patch("synthevix.quest.pomodoro.Live", return_value=live_mock):
+        run_pomodoro(minutes=1)
+
+    assert len(called_with) > 0, "check_and_unlock was never called after Pomodoro completion"
+
+
+def test_quest_has_repeat_column():
+    from synthevix.quest.models import add_quest, get_quest
+    qid = add_quest("Recurring", difficulty="easy", repeat="daily")
+    q = get_quest(qid)
+    assert q["repeat"] == "daily"
+
+def test_quest_repeat_defaults_to_none():
+    from synthevix.quest.models import add_quest, get_quest
+    qid = add_quest("Normal quest", difficulty="easy")
+    q = get_quest(qid)
+    assert q["repeat"] == "none"

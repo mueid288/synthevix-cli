@@ -11,7 +11,7 @@ SYNTHEVIX_DIR = Path.home() / ".synthevix"
 DB_PATH = SYNTHEVIX_DIR / "data.db"
 BACKUP_DIR = SYNTHEVIX_DIR / "backups"
 
-_SCHEMA_VERSION = 1
+_SCHEMA_VERSION = 2
 
 
 def _ensure_dirs() -> None:
@@ -177,6 +177,8 @@ def init_db() -> None:
         # Seed achievements
         _seed_achievements(conn)
 
+        _run_migrations(conn)
+
     conn.close()
 
 
@@ -198,3 +200,53 @@ def _seed_achievements(conn: sqlite3.Connection) -> None:
             (id, name, description, emoji, condition_type, condition_value, xp_reward)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     """, _ACHIEVEMENTS)
+
+
+def _run_migrations(conn: sqlite3.Connection) -> None:
+    """Apply schema upgrades in version order."""
+    row = conn.execute("SELECT version FROM schema_version LIMIT 1").fetchone()
+    version = row[0] if row else 0
+
+    if version < 2:
+        backup_db()
+
+        # Add recurrence column (idempotent)
+        try:
+            conn.execute("ALTER TABLE quests ADD COLUMN repeat TEXT DEFAULT 'none'")
+        except Exception:
+            pass  # already exists
+
+        # FTS5 virtual table + triggers for brain search
+        try:
+            conn.execute("""
+                CREATE VIRTUAL TABLE IF NOT EXISTS brain_fts
+                USING fts5(title, content, tags, content="brain_entries", content_rowid="id")
+            """)
+            conn.execute("""
+                CREATE TRIGGER IF NOT EXISTS after_brain_insert
+                AFTER INSERT ON brain_entries BEGIN
+                  INSERT INTO brain_fts(rowid, title, content, tags)
+                    VALUES (new.id, COALESCE(new.title,''), COALESCE(new.content,''), COALESCE(new.tags,''));
+                END
+            """)
+            conn.execute("""
+                CREATE TRIGGER IF NOT EXISTS after_brain_update
+                AFTER UPDATE ON brain_entries BEGIN
+                  INSERT INTO brain_fts(brain_fts, rowid, title, content, tags)
+                    VALUES ('delete', old.id, COALESCE(old.title,''), COALESCE(old.content,''), COALESCE(old.tags,''));
+                  INSERT INTO brain_fts(rowid, title, content, tags)
+                    VALUES (new.id, COALESCE(new.title,''), COALESCE(new.content,''), COALESCE(new.tags,''));
+                END
+            """)
+            conn.execute("""
+                CREATE TRIGGER IF NOT EXISTS after_brain_delete
+                AFTER DELETE ON brain_entries BEGIN
+                  INSERT INTO brain_fts(brain_fts, rowid, title, content, tags)
+                    VALUES ('delete', old.id, COALESCE(old.title,''), COALESCE(old.content,''), COALESCE(old.tags,''));
+                END
+            """)
+            conn.execute("INSERT INTO brain_fts(brain_fts) VALUES('rebuild')")
+        except Exception:
+            pass  # FTS5 not available — search falls back to LIKE
+
+        conn.execute("UPDATE schema_version SET version = 2")

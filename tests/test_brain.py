@@ -134,3 +134,22 @@ def test_count_entries():
     add_entry(type="note", content="one")
     add_entry(type="journal", content="two")
     assert count_entries() == 2
+
+
+def test_fts5_search_finds_by_content():
+    from synthevix.brain.models import add_entry, search_entries
+    add_entry("note", content="The quick brown fox jumps over the lazy dog", title="Fox Note")
+    add_entry("note", content="Nothing related here", title="Unrelated")
+    results = search_entries("fox")
+    titles = [r["title"] for r in results]
+    assert "Fox Note" in titles
+    assert "Unrelated" not in titles
+
+def test_fts5_search_updated_after_edit():
+    from synthevix.brain.models import add_entry, update_entry, search_entries
+    eid = add_entry("note", content="original content", title="Edit Me")
+    update_entry(eid, content="completely different text about elephants")
+    results = search_entries("elephants")
+    assert any(r["id"] == eid for r in results)
+    old_results = search_entries("original")
+    assert not any(r["id"] == eid for r in old_results)

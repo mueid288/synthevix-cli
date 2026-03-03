@@ -22,7 +22,7 @@ class QuestWidget(DataTable):
         self._quests: list[dict] = []
 
     def on_mount(self) -> None:
-        primary = self.app.design.get("primary", "#ffffff")
+        primary = self.app.get_theme_color("primary")
         self.border_title = f"[bold {primary}]⚡  Quests[/bold {primary}]"
         self.cursor_type = "row"
         self.add_column("ID", width=4)
@@ -51,7 +51,7 @@ class QuestWidget(DataTable):
         except Exception:
             quests = []
 
-        primary = self.app.design.get("primary", "#ffffff")
+        primary = self.app.get_theme_color("primary")
 
         diff_colors = {
             "trivial": "dim",

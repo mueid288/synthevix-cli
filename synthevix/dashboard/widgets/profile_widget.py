@@ -22,7 +22,7 @@ class ProfileWidget(Static):
     """
 
     def on_mount(self) -> None:
-        primary = self.app.design.get("primary", "#ffffff")
+        primary = self.app.get_theme_color("primary")
         self.border_title = f"[bold {primary}]⚔  Profile[/bold {primary}]"
         self.update_profile()
         self.set_interval(10.0, self.update_profile)
@@ -56,12 +56,12 @@ class ProfileWidget(Static):
             self.animating_level_up = False
             if self.animation_timer:
                 self.animation_timer.stop()
-            self.styles.border = ("round", self.app.design.get("primary", "#ffffff"))
+            self.styles.border = ("round", self.app.get_theme_color("primary"))
             self.update_profile()
             return
             
         is_flash = self.animation_step % 2 == 0
-        color = "#ffffff" if is_flash else self.app.design.get("primary", "#ffffff")
+        color = "#ffffff" if is_flash else self.app.get_theme_color("primary")
         
         # Flash the border
         self.styles.border = ("heavy", color)
@@ -95,7 +95,7 @@ class ProfileWidget(Static):
         shields = profile.get("streak_shields", 0)
 
         # Get the theme's primary color from the app's stylesheet variables
-        primary = self.app.design.get("primary", "#ffffff")
+        primary = self.app.get_theme_color("primary")
         
         from synthevix.core.utils import rank_title
         rank = rank_title(level)

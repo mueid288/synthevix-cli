@@ -21,7 +21,7 @@ class BrainWidget(DataTable):
         self._entry_ids: list[int] = []
 
     def on_mount(self) -> None:
-        primary = self.app.design.get("primary", "#ffffff")
+        primary = self.app.get_theme_color("primary")
         self.border_title = f"[bold {primary}]🧠  Brain[/bold {primary}]"
         self.cursor_type = "row"
         self.add_column("ID", width=4)
@@ -49,8 +49,8 @@ class BrainWidget(DataTable):
         except Exception:
             entries = []
 
-        primary = self.app.design.get("primary", "#ffffff")
-        accent = self.app.design.get("secondary", "#aaaaaa")
+        primary = self.app.get_theme_color("primary")
+        accent = self.app.get_theme_color("secondary")
 
         type_colors = {
             "note": accent,

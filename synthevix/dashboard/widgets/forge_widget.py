@@ -14,7 +14,7 @@ class ForgeStats(Static):
     """Displays developer stats and git activity."""
 
     def on_mount(self) -> None:
-        primary = self.app.design.get("primary", "#ffffff")
+        primary = self.app.get_theme_color("primary")
         self.border_title = f"[bold {primary}]🛠️  Forge[/bold {primary}]"
         self.update_forge()
         self.set_interval(60.0, self.update_forge)
@@ -31,7 +31,7 @@ class ForgeStats(Static):
             commits_today = 0
             streak_data = []
 
-        primary = self.app.design.get("primary", "#ffffff")
+        primary = self.app.get_theme_color("primary")
 
         t = Text()
         label_width = 20

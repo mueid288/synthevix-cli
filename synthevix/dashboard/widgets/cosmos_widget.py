@@ -19,7 +19,7 @@ class CosmosWidget(Static):
 
     def on_mount(self) -> None:
         cfg = load_config()
-        primary = self.app.design.get("primary", "#ffffff")
+        primary = self.app.get_theme_color("primary")
         self.border_title = f"[bold {primary}]🌌  Cosmos[/bold {primary}]"
         # Cache quote so it doesn't flicker on every refresh
         self.quote_cache = random_quote(categories=cfg.cosmos.quote_categories)
@@ -38,8 +38,8 @@ class CosmosWidget(Static):
         except Exception:
             history = []
 
-        primary = self.app.design.get("primary", "#ffffff")
-        accent = self.app.design.get("secondary", "#aaaaaa")
+        primary = self.app.get_theme_color("primary")
+        accent = self.app.get_theme_color("secondary")
 
         MOOD_COLORS = {1: "red", 2: "orange3", 3: "yellow", 4: "green3", 5: "green", 6: "cyan"}
 

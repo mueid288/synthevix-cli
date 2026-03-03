@@ -48,7 +48,10 @@ class SynthevixDashboard(App):
         from textual.design import ColorSystem
         cfg = load_config()
         theme_data = get_theme_data(cfg.theme.active)
-        
+
+        # Store raw theme dict so widgets can read hex color values directly.
+        self._synthevix_theme: dict = theme_data
+
         pri = theme_data["primary"]
         acc = theme_data["accent"]
         warn = theme_data["warning"]
@@ -69,6 +72,13 @@ class SynthevixDashboard(App):
             "dark": system,
             "light": system,
         }
+
+    def get_theme_color(self, key: str = "primary") -> str:
+        """Return a hex color string from the active Synthevix theme."""
+        theme = getattr(self, "_synthevix_theme", None)
+        if theme:
+            return theme.get(key, "#ffffff")
+        return get_theme_data(load_config().theme.active).get(key, "#ffffff")
 
     def action_focus_dashboard(self) -> None:
         """Refresh all dashboard widgets and keep focus inside the grid."""
